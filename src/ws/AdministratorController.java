@@ -36,7 +36,7 @@ public class AdministratorController {
     }
 
     @GET // means: to call this endpoint, we need to use the verb get
-    @Path("/") // means: the relative url path is “/api/administrators// /”
+    @Path("/") // means: the relative url path is “/api/students/”
     public Response all() {
         try {
             return Response.status(200).entity(toDTOs(administratorBean.all())).build();
