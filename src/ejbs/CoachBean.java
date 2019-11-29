@@ -1,10 +1,12 @@
 package ejbs;
 
 import entities.Coach;
+import entities.Sport;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
 
+import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -16,6 +18,9 @@ import java.util.List;
 public class CoachBean {
     @PersistenceContext
     private EntityManager em;
+
+    @EJB
+    private SportBean sportBean;
 
     public Coach create (String username,String password, String name, String email) throws MyEntityExistsException {
         if (find(username)!=null){
@@ -59,7 +64,7 @@ public class CoachBean {
             em.merge(coach);
             return coach;
         }catch (Exception e){
-            throw new EJBException("ERROR_UPDATING_COAC", e);
+            throw new EJBException("ERROR_UPDATING_COACH", e);
         }
     }
 
@@ -73,6 +78,28 @@ public class CoachBean {
             em.remove(coach);
         }catch (Exception e){
             throw new EJBException("ERROR_DELETING_COACH", e);
+        }
+    }
+
+    public void associateCoachToSport(String coachUsername, int sportCode){
+        try{
+            Coach coach = find(coachUsername);
+            Sport sport = sportBean.find(sportCode);
+            coach.addSport(sport);
+            sport.addCoach(coach);
+        } catch (Exception e){
+            throw new EJBException("ERROR_ASSOCIATE_COACH_TO_SPORT", e);
+        }
+    }
+
+    public void dissociateCoachFromSport(String coachUsername, int sportCode){
+        try{
+            Coach coach = find(coachUsername);
+            Sport sport = sportBean.find(sportCode);
+            coach.removeSport(sport);
+            sport.removeCoach(coach);
+        } catch (Exception e){
+            throw new EJBException("ERROR_DISSOCIATE_COACH_FROM_SPORT", e);
         }
     }
 }
