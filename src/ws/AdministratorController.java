@@ -69,12 +69,14 @@ public class AdministratorController {
 
     @POST
     @Path("/")
-    public Response createNewAdministrator (AdministratorDTO administratorDTO) throws MyEntityExistsException {
-        Administrator administrator = administratorBean.create(administratorDTO.getUsername(),
-                administratorDTO.getPassword(),
-                administratorDTO.getName(),
-                administratorDTO.getEmail());
-        return Response.status(Response.Status.CREATED).entity(toDTO(administrator)).build();
+    public Response createNewAdministrator (AdministratorDTO administratorDTO) throws MyEntityExistsException, MyEntityNotFoundException {
+
+        administratorBean.create(administratorDTO.getUsername(), administratorDTO.getPassword(), administratorDTO.getName(), administratorDTO.getEmail());
+        try{
+            return Response.status(Response.Status.CREATED).build();
+        } catch (Exception e) {
+            throw new EJBException("ERROR_CREATING_STUDENT", e);
+        }
     }
 
     @PUT
