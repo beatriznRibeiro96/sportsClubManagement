@@ -53,8 +53,6 @@ public class ConfigBean {
             Coach coach = coachBean.create("coach1","coach","Joana","joana@mail.pt");
             Sport sport = sportBean.create(1, "Futebol");
 
-            sportBean.associate(1, "coach1");
-
             Category category1 = categoryBean.create("Artigo desportivo");
             Category category2 = categoryBean.create("Seguro");
             Category category3 = categoryBean.create("Graduação");//Por exemplo: uniformes
