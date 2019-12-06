@@ -1,8 +1,8 @@
 package ws;
 
-import dtos.CategoryDTO;
-import ejbs.CategoryBean;
-import entities.Category;
+import dtos.MethodPaymentDTO;
+import ejbs.MethodPaymentBean;
+import entities.MethodPayment;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -12,33 +12,33 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Path("/categories")
+@Path("/methodpayments")
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
-public class CategoryController {
+public class MethodPaymentController {
 
     @EJB
-    private CategoryBean categoryBean;
+    MethodPaymentBean methodPaymentBean;
 
-    CategoryDTO toDTO(Category category) {
-        return new CategoryDTO(
-                category.getId(),
-                category.getDescription(),
-                category.isInvalid()
+    MethodPaymentDTO toDTO(MethodPayment methodPayment) {
+        return new MethodPaymentDTO(
+                methodPayment.getId(),
+                methodPayment.getMethod(),
+                methodPayment.isInvalid()
         );
     }
 
-    List<CategoryDTO> toDTOs(List<Category> categories) {
+    List<MethodPaymentDTO> toDTOs(List<MethodPayment> categories) {
         return categories.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @GET
     @Path("/")
-    public List<CategoryDTO> all() {
+    public List<MethodPaymentDTO> all() {
         try {
-            return toDTOs(categoryBean.all());
+            return toDTOs(methodPaymentBean.all());
         } catch (Exception e) {
-            throw new EJBException("ERROR_GET_CATEGORIES", e);
+            throw new EJBException("ERROR_GET_METHOD_PAYMENTS", e);
         }
     }
 
@@ -46,10 +46,10 @@ public class CategoryController {
     @Path("/{id}")
     public Response getById(@PathParam("id") int id) {
         try {
-            Category category = categoryBean.find(id);
+            MethodPayment methodPayment = methodPaymentBean.find(id);
 
-            if(category != null) {
-                return Response.status(Response.Status.OK).entity(toDTO(category)).build();
+            if(methodPayment != null) {
+                return Response.status(Response.Status.OK).entity(toDTO(methodPayment)).build();
             }
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (Exception e) {
@@ -59,12 +59,12 @@ public class CategoryController {
 
     @POST
     @Path("/")
-    public Response createNewProduct(CategoryDTO categoryDTO) {
+    public Response createNewProduct(MethodPaymentDTO methodPaymentDTO) {
         try {
-            Category newCategory = categoryBean.create(categoryDTO.getDescription());
+            MethodPayment newMethod = methodPaymentBean.create(methodPaymentDTO.getMethod());
 
-            if(newCategory != null) {
-                return Response.status(Response.Status.OK).entity(toDTO(newCategory)).build();
+            if(newMethod != null) {
+                return Response.status(Response.Status.OK).entity(toDTO(newMethod)).build();
             }
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -75,12 +75,12 @@ public class CategoryController {
 
     @PUT
     @Path("/{id}")
-    public Response updateProduct(@PathParam("id") int idFromCategoryToUpdate, CategoryDTO categoryDTO) {
+    public Response updateProduct(@PathParam("id") int idFromMethodToUpdate, MethodPaymentDTO methodPaymentDTO) {
         try {
-            Category category = categoryBean.update(idFromCategoryToUpdate, categoryDTO.getDescription());
+            MethodPayment methodPayment = methodPaymentBean.update(idFromMethodToUpdate, methodPaymentDTO.getMethod());
 
-            if(category != null) {
-                return Response.status(Response.Status.OK).entity(toDTO(category)).build();
+            if(methodPayment != null) {
+                return Response.status(Response.Status.OK).entity(toDTO(methodPayment)).build();
             }
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
@@ -92,10 +92,10 @@ public class CategoryController {
     @Path("/{id}")
     public Response deleteProduct(@PathParam("id") int id) {
         try {
-            Category category = categoryBean.delete(id);
+            MethodPayment methodPayment = methodPaymentBean.delete(id);
 
-            if(category != null) {
-                return Response.status(Response.Status.OK).entity(toDTO(category)).build();
+            if(methodPayment != null) {
+                return Response.status(Response.Status.OK).entity(toDTO(methodPayment)).build();
             }
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

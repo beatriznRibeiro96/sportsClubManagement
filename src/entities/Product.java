@@ -1,10 +1,8 @@
 package entities;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 
 import javax.persistence.*;
-import javax.validation.constraints.Null;
+import javax.validation.constraints.NotNull;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -18,7 +16,7 @@ import java.util.Set;
         ),
         @NamedQuery(
                 name = "getValidProducts",
-                query = "SELECT p FROM Product p WHERE p.invalid = false ORDER BY p.id"
+                query = "SELECT p FROM Product p WHERE p.invalid = false AND p.category.invalid = false ORDER BY p.id"
         )
 })
 public class Product {
@@ -27,7 +25,6 @@ public class Product {
     @GeneratedValue
     private int id;
 
-    //TODO: quando insiro dados null cria objeto na mesma
     @NotNull
     private String description;
 

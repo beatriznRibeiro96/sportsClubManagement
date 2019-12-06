@@ -1,6 +1,6 @@
 package ws;
 
-import dto.ProductDTO;
+import dtos.ProductDTO;
 import ejbs.CategoryBean;
 import ejbs.ProductBean;
 import entities.Category;
@@ -31,6 +31,7 @@ public class ProductController {
                 product.getDescription(),
                 product.getPrice(),
                 product.getCategory().getId(),
+                product.getCategory().getDescription(),
                 product.isInvalid(),
                 product.getReplaces() == null ? -1 : product.getReplaces().getId()
         );

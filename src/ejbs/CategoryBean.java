@@ -62,15 +62,19 @@ public class CategoryBean {
         }
     }
 
-    public Category delete(int idFromCategoryToUpdate) {
+    public Category delete(int id) {
         try{
-            Category category = find(idFromCategoryToUpdate);
+            Category category = find(id);
 
-            category.setInvalid(true);
+            if(category.getProducts().size() > 0) {
+                category.setInvalid(true);
 
-            em.persist(category);
+                em.persist(category);
+                return category;
+            }
 
-            return category;
+            em.remove(category);
+            return null;
         }catch (Exception e) {
             throw new EJBException("ERROR_DELETING_CATEGORY", e);
         }

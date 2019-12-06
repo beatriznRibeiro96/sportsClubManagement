@@ -1,6 +1,6 @@
 package ejbs;
 
-import dto.ProductDTO;
+import dtos.ProductDTO;
 import entities.Category;
 import entities.Product;
 
@@ -10,10 +10,7 @@ import javax.ejb.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Singleton
 public class ProductBean {
@@ -47,6 +44,7 @@ public class ProductBean {
                         product.getDescription(),
                         product.getPrice(),
                         product.getCategory().getId(),
+                        product.getCategory().getDescription(),
                         product.isInvalid(),
                         product.getReplaces() == null ? -1 : product.getReplaces().getId()
                 );
@@ -57,6 +55,7 @@ public class ProductBean {
                             child.getDescription(),
                             child.getPrice(),
                             child.getCategory().getId(),
+                            child.getCategory().getDescription(),
                             child.isInvalid(),
                             child.getReplaces() == null ? -1 : child.getReplaces().getId()
                         ));

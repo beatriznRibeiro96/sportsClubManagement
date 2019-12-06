@@ -1,22 +1,21 @@
 package dtos;
 
-
 import java.io.Serializable;
 
-public class CategoryDTO implements Serializable {
+public class MethodPaymentDTO implements Serializable {
 
 
     private int id;
-    private String description;
+    private String method;
     private  boolean invalid;
 
-    public CategoryDTO() {
+    public MethodPaymentDTO() {
+
     }
 
-    public CategoryDTO(int id, String description, boolean invalid) {
-        this();
+    public MethodPaymentDTO(int id, String method, boolean invalid) {
         this.id = id;
-        this.description = description;
+        this.method = method;
         this.invalid = invalid;
     }
 
@@ -28,12 +27,12 @@ public class CategoryDTO implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
+    public String getMethod() {
+        return method;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setMethod(String method) {
+        this.method = method;
     }
 
     public boolean isInvalid() {
@@ -43,5 +42,4 @@ public class CategoryDTO implements Serializable {
     public void setInvalid(boolean invalid) {
         this.invalid = invalid;
     }
-
 }

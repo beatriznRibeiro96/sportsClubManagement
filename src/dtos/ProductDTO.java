@@ -1,7 +1,5 @@
-package dto;
+package dtos;
 
-
-import entities.Product;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -14,6 +12,7 @@ public class ProductDTO implements Serializable {
     private String description;
     private double price;
     private int categoryID;
+    private String categoryDescription;
     private  boolean invalid;
     private int replacingCategoryId;
     private Collection<ProductDTO> replacedBy;
@@ -22,12 +21,13 @@ public class ProductDTO implements Serializable {
         this.replacedBy = new LinkedHashSet<>();
     }
 
-    public ProductDTO(int id, String description, double price, int categoryID, boolean invalid, int replacingCategoryId) {
+    public ProductDTO(int id, String description, double price, int categoryID, String categoryDescription, boolean invalid, int replacingCategoryId) {
         this();
         this.id = id;
         this.description = description;
         this.price = price;
         this.categoryID = categoryID;
+        this.categoryDescription = categoryDescription;
         this.invalid = invalid;
         this.replacingCategoryId = replacingCategoryId;
     }
@@ -70,6 +70,14 @@ public class ProductDTO implements Serializable {
 
     public void setCategoryID(int categoryID) {
         this.categoryID = categoryID;
+    }
+
+    public String getCategoryDescription() {
+        return categoryDescription;
+    }
+
+    public void setCategoryDescription(String categoryDescription) {
+        this.categoryDescription = categoryDescription;
     }
 
     public int getReplacingCategoryId() {

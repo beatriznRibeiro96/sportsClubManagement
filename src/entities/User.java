@@ -10,6 +10,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,14 +35,19 @@ public abstract class User implements Serializable {
     @Column(nullable = false)
     protected String email;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    private Set<Order> orders;
+
     @Version
     private int version;
 
 
     public User() {
+        orders = new LinkedHashSet<>();
     }
 
     public User(String username, String password, String name, String email) {
+        this();
         this.username = username;
         this.password = hashPassword(password);
         this.name = name;
@@ -79,6 +86,14 @@ public abstract class User implements Serializable {
         this.email = email;
     }
 
+    public Set<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(Set<Order> orders) {
+        this.orders = orders;
+    }
+
     public static String hashPassword(String password) {
         char[] encoded = null;
         try {
@@ -93,4 +108,13 @@ public abstract class User implements Serializable {
         }
         return new String(encoded);
     }
+
+    public void addOrder(Order order) {
+        this.orders.add(order);
+    }
+
+    public void removeOrder(Order order) {
+        this.orders.remove(order);
+    }
+
 }
