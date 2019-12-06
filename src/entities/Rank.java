@@ -6,7 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table("RANKS")
+@Table(name = "RANKS", uniqueConstraints = @UniqueConstraint(columnNames = {"NAME", "SPORT_CODE"}))
 @NamedQueries({
         @NamedQuery(
                 name = "getAllRanks",
@@ -15,7 +15,6 @@ import java.util.Set;
 })
 public class Rank implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
     private String name;
     @ManyToOne
@@ -25,7 +24,8 @@ public class Rank implements Serializable {
     public Rank() {
     }
 
-    public Rank(String name, Sport sport) {
+    public Rank(int code, String name, Sport sport) {
+        this.code = code;
         this.name = name;
         this.sport = sport;
     }

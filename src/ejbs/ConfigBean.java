@@ -25,6 +25,9 @@ public class ConfigBean {
     @EJB
     private AthleteBean athleteBean;
 
+    @EJB
+    private RankBean rankBean;
+
     @PostConstruct
     public void PopulateDB(){
         try {
@@ -33,6 +36,7 @@ public class ConfigBean {
             Sport sport = sportBean.create(1, "Futebol");
             Partner partner = partnerBean.create("partner1", "partner", "Miguel", "miguel@mail.pt");
             Athlete athlete = athleteBean.create("athlete1", "athlete", "Rui", "rui@mail.pt");
+            Rank rank = rankBean.create(1, "Futebol-Senior", sport.getCode());
             sportBean.associateCoach(sport.getCode(), coach.getUsername());
             sportBean.associateAthlete(sport.getCode(), athlete.getUsername());
         } catch (Exception e) {
