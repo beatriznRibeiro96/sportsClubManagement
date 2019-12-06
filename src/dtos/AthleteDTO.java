@@ -3,6 +3,7 @@ package dtos;
 import java.io.Serializable;
 
 public class AthleteDTO extends PartnerDTO implements Serializable {
+
     public AthleteDTO() {
     }
 
