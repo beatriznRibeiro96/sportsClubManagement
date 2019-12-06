@@ -40,12 +40,19 @@ public class ConfigBean {
     @EJB
     private MethodPaymentBean methodPaymentBean;
 
+    private PartnerBean partnerBean;
+
+    @EJB
+    private AthleteBean athleteBean;
+
+
     @PostConstruct
     public void PopulateDB(){
         try {
             Administrator administrator = administratorBean.create("admin1","admin","Joao","joao@mail.pt");
             Coach coach = coachBean.create("coach1","coach","Joana","joana@mail.pt");
             Sport sport = sportBean.create(1, "Futebol");
+
             sportBean.associate(1, "coach1");
 
             Category category1 = categoryBean.create("Artigo desportivo");
@@ -77,6 +84,12 @@ public class ConfigBean {
             Payment payment1 = paymentBean.create(23.5, order1, methodPayment1);
             orderBean.setPaymentInOrder(payment1.getId(), order1.getId());
             orderBean.updatePayed(order1.getId());
+
+            Partner partner = partnerBean.create("partner1", "partner", "Miguel", "miguel@mail.pt");
+            Athlete athlete = athleteBean.create("athlete1", "athlete", "Rui", "rui@mail.pt");
+            sportBean.associateCoach(sport.getCode(), coach.getUsername());
+            sportBean.associateAthlete(sport.getCode(), athlete.getUsername());
+
         } catch (Exception e) {
             e.printStackTrace();
         }

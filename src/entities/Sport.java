@@ -23,17 +23,25 @@ public class Sport implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "COACH_USERNAME", referencedColumnName =
                     "USERNAME", nullable = false))
     private Set<Coach> coaches;
+    @ManyToMany
+    @JoinTable(name = "SPORTS_ATHLETES",
+            joinColumns = @JoinColumn(name = "SPORT_CODE", referencedColumnName = "CODE", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "ATHLETE_USERNAME", referencedColumnName =
+                    "USERNAME", nullable = false))
+    private Set<Athlete> athletes;
     @Version
     private int version;
 
     public Sport() {
         this.coaches = new LinkedHashSet<>();
+        this.athletes = new LinkedHashSet<>();
     }
 
     public Sport(int code, String name) {
         this.code = code;
         this.name = name;
         this.coaches = new LinkedHashSet<>();
+        this.athletes = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -60,11 +68,27 @@ public class Sport implements Serializable {
         this.coaches = coaches;
     }
 
+    public Set<Athlete> getAthletes() {
+        return athletes;
+    }
+
+    public void setAthletes(Set<Athlete> athletes) {
+        this.athletes = athletes;
+    }
+
     public void addCoach(Coach coach) {
         coaches.add(coach);
     }
 
     public void removeCoach(Coach coach){
         coaches.remove(coach);
+    }
+
+    public void addAthlete(Athlete athlete) {
+        athletes.add(athlete);
+    }
+
+    public void removeAthlete(Athlete athlete){
+        athletes.remove(athlete);
     }
 }
