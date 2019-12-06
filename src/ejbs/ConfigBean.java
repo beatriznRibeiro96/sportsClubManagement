@@ -40,6 +40,7 @@ public class ConfigBean {
     @EJB
     private MethodPaymentBean methodPaymentBean;
 
+    @EJB
     private PartnerBean partnerBean;
 
     @EJB
