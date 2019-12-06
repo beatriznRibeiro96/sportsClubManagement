@@ -20,6 +20,8 @@ public class Rank implements Serializable {
     @ManyToOne
     @JoinColumn(name="SPORT_CODE", nullable = false)
     private Sport sport;
+    @Version
+    private int version;
 
     public Rank() {
     }

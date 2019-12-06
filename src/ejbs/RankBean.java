@@ -31,8 +31,8 @@ public class RankBean {
         }
         try {
             Rank rank = new Rank(code, name, sport);
-            sport.addRank(rank);
             em.persist(rank);
+            sport.addRank(rank);
             return rank;
         } catch(Exception e){
             throw new EJBException("ERROR_CREATING_RANK", e);
@@ -65,10 +65,10 @@ public class RankBean {
             em.lock(rank, LockModeType.OPTIMISTIC);
             rank.setName(name);
             rank.setSport(sport);
+            em.merge(rank);
             if(!sport.getRanks().contains(rank)){
                 sport.addRank(rank);
             }
-            em.merge(rank);
             return rank;
         }catch (Exception e){
             throw new EJBException("ERROR_UPDATING_RANK", e);
