@@ -1,9 +1,6 @@
 package ejbs;
 
-import entities.Administrator;
-import entities.Coach;
-import entities.Partner;
-import entities.Sport;
+import entities.*;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -25,6 +22,9 @@ public class ConfigBean {
     @EJB
     private PartnerBean partnerBean;
 
+    @EJB
+    private AthleteBean athleteBean;
+
     @PostConstruct
     public void PopulateDB(){
         try {
@@ -32,7 +32,9 @@ public class ConfigBean {
             Coach coach = coachBean.create("coach1","coach","Joana","joana@mail.pt");
             Sport sport = sportBean.create(1, "Futebol");
             Partner partner = partnerBean.create("partner1", "partner", "Miguel", "miguel@mail.pt");
-            sportBean.associate(1, "coach1");
+            Athlete athlete = athleteBean.create("athlete1", "athlete", "Rui", "rui@mail.pt");
+            sportBean.associateCoach(sport.getCode(), coach.getUsername());
+            sportBean.associateAthlete(sport.getCode(), athlete.getUsername());
         } catch (Exception e) {
             e.printStackTrace();
         }

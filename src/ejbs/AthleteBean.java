@@ -1,10 +1,11 @@
 package ejbs;
 
-import entities.Administrator;
 import entities.Athlete;
+import entities.Sport;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
+import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -16,6 +17,9 @@ import java.util.List;
 public class AthleteBean {
     @PersistenceContext
     private EntityManager em;
+
+    @EJB
+    private SportBean sportBean;
 
     public Athlete create(String username, String password, String name, String email) throws MyEntityExistsException {
         if(find(username) != null){
@@ -31,7 +35,7 @@ public class AthleteBean {
     }
     public List<Athlete> all() {
         try {
-            return (List<Athlete>) em.createNamedQuery("getAllAthlete").getResultList();
+            return (List<Athlete>) em.createNamedQuery("getAllAthletes").getResultList();
         } catch (Exception e) {
             throw new EJBException("ERROR_RETRIEVING_ATHELETE", e);
         }
@@ -72,6 +76,28 @@ public class AthleteBean {
             em.remove(athlete);
         }catch (Exception e){
             e.getMessage();
+        }
+    }
+
+    public void associateAthleteToSport(String athleteUsername, int sportCode){
+        try{
+            Athlete athlete = find(athleteUsername);
+            Sport sport = sportBean.find(sportCode);
+            athlete.addSport(sport);
+            sport.addAthlete(athlete);
+        } catch (Exception e){
+            throw new EJBException("ERROR_ASSOCIATE_ATHLETE_TO_SPORT", e);
+        }
+    }
+
+    public void dissociateAthleteFromSport(String athleteUsername, int sportCode){
+        try{
+            Athlete athlete = find(athleteUsername);
+            Sport sport = sportBean.find(sportCode);
+            athlete.removeSport(sport);
+            sport.removeAthlete(athlete);
+        } catch (Exception e){
+            throw new EJBException("ERROR_DISSOCIATE_ATHLETE_FROM_SPORT", e);
         }
     }
 }
