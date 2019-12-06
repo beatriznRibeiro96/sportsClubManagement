@@ -12,6 +12,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Path("/administrators")
@@ -31,12 +32,12 @@ public class AdministratorController {
     }
 
     // converts an entire list of entities into a list of DTOs
-    private Collection<AdministratorDTO> toDTOs(Collection<Administrator> administrators) {
+    private List<AdministratorDTO> toDTOs(List<Administrator> administrators) {
         return administrators.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @GET // means: to call this endpoint, we need to use the verb get
-    @Path("/") // means: the relative url path is “/api/administrators// /”
+    @Path("/") // means: the relative url path is “/api/administrators/”
     public Response all() {
         try {
             return Response.status(200).entity(toDTOs(administratorBean.all())).build();
