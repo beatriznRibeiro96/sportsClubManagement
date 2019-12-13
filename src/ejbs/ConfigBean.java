@@ -53,6 +53,15 @@ public class ConfigBean {
     @EJB
     private RankBean rankBean;
 
+    @EJB
+    private SeasonBean seasonBean;
+
+    @EJB
+    private ActiveSportBean activeSportBean;
+
+    @EJB
+    private SportSubscriptionBean sportSubscriptionBean;
+
     @PostConstruct
     public void PopulateDB(){
         try {
@@ -95,9 +104,15 @@ public class ConfigBean {
             Rank rank = rankBean.create(1, "Futebol-Seniores", sport.getCode());
             Rank rank1 = rankBean.create(2, "Futebol-Junior", sport.getCode());
             rankBean.update(rank1.getCode(), "Futebol-Juniores", sport.getCode());
-            sportBean.associateCoach(sport.getCode(), coach.getUsername());
-            sportBean.associateAthlete(sport.getCode(), athlete.getUsername());
 
+            Season season = seasonBean.create(1, "18/19");
+            ActiveSport activeSport = activeSportBean.create(1, "Futebol-18/19", sport.getCode(), season.getCode());
+            SportSubscription sportSubscription = sportSubscriptionBean.create(1, activeSport.getCode(), athlete.getUsername());
+            Sport sport2 = sportBean.create(2, "Andebol");
+            ActiveSport activeSport2 = activeSportBean.create(2, "Andebol-18/19", sport2.getCode(), season.getCode());
+            Athlete athlete2 = athleteBean.create("athlete2", "athlete", "Luís", "luis@mail.pt");
+            SportSubscription sportSubscription2 = sportSubscriptionBean.create(2, activeSport2.getCode(), athlete.getUsername());
+            SportSubscription sportSubscription3 = sportSubscriptionBean.create(3, activeSport2.getCode(), athlete2.getUsername());
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
         }

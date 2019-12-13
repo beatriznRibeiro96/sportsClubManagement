@@ -1,0 +1,99 @@
+package ws;
+
+import dtos.ActiveSportDTO;
+import ejbs.ActiveSportBean;
+import entities.ActiveSport;
+import exceptions.MyEntityExistsException;
+import exceptions.MyEntityNotFoundException;
+
+import javax.ejb.EJB;
+import javax.ejb.EJBException;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Path("/activeSports") // relative url web path of this controller
+@Produces((MediaType.APPLICATION_JSON)) // injects header “Content-Type: application/json”
+@Consumes((MediaType.APPLICATION_JSON)) // injects header “Accept: application/json”
+public class ActiveSportController {
+    @EJB
+    private ActiveSportBean activeSportBean;
+
+    public static ActiveSportDTO toDTO(ActiveSport activeSport){
+        return new ActiveSportDTO(
+                activeSport.getCode(),
+                activeSport.getName(),
+                activeSport.getSport().getCode(),
+                activeSport.getSport().getName(),
+                activeSport.getSeason().getCode(),
+                activeSport.getSeason().getName()
+        );
+    }
+
+    // converts an entire list of entities into a list of DTOs
+    public static List<ActiveSportDTO> toDTOs(Collection<ActiveSport> activeSports){
+        return activeSports.stream().map(ActiveSportController::toDTO).collect(Collectors.toList());
+    }
+
+    @GET // means: to call this endpoint, we need to use the verb get
+    @Path("/") // means: the relative url path is “/api/activeSports/”
+    public Response all() {
+        try {
+            return Response.status(200).entity(toDTOs(activeSportBean.all())).build();
+        } catch (Exception e) {
+            throw new EJBException("ERROR_GET_ACTIVE_SPORTS", e);
+        }
+    }
+
+    @GET
+    @Path("{code}")
+    public Response getActiveSportDetails(@PathParam("code") int code) {
+        String msg;
+        try {
+            ActiveSport activeSport = activeSportBean.find(code);
+            if (activeSport != null) {
+                return Response.status(Response.Status.OK)
+                        .entity(toDTO(activeSport))
+                        .build();
+            }
+            msg = "ERROR_FINDING_ACTIVE_SPORT";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_ACTIVE_SPORT_DETAILS --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
+
+    @POST
+    @Path("/")
+    public Response createNewActiveSport (ActiveSportDTO activeSportDTO) throws MyEntityExistsException, MyEntityNotFoundException {
+        ActiveSport activeSport = activeSportBean.create(activeSportDTO.getCode(),
+                activeSportDTO.getName(),
+                activeSportDTO.getSportCode(),
+                activeSportDTO.getSeasonCode());
+        return Response.status(Response.Status.CREATED).entity(toDTO(activeSport)).build();
+    }
+
+    @PUT
+    @Path("{code}")
+    public Response updateActiveSport(@PathParam("code") int code, ActiveSportDTO activeSportDTO) throws MyEntityNotFoundException {
+        ActiveSport activeSport = activeSportBean.update(code,
+                activeSportDTO.getName(),
+                activeSportDTO.getSportCode(),
+                activeSportDTO.getSeasonCode());
+        return Response.status(Response.Status.OK).entity(toDTO(activeSport)).build();
+    }
+
+    @DELETE
+    @Path("{code}")
+    public Response deleteActiveSport (@PathParam("code") int code) throws MyEntityNotFoundException{
+        activeSportBean.delete(code);
+        return Response.status(Response.Status.OK).build();
+    }
+}
