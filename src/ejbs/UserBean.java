@@ -47,4 +47,14 @@ public class UserBean {
             throw new EJBException("ERROR_REMOVING_ORDER_IN_USER", e);
         }
     }
+
+    public User authenticate(final String username, final String password) throws
+            Exception {
+        User user = find(username);
+        if (user != null &&
+                user.getPassword().equals(User.hashPassword(password))) {
+            return user;
+        }
+        throw new Exception("Failed logging in with username '" + username + "': unknown username or wrong password");
+    }
 }

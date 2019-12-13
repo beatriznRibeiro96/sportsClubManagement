@@ -6,10 +6,14 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Startup
 @Singleton(name = "ConfigEJB")
 public class ConfigBean {
+    private static final Logger logger = Logger.getLogger("ejbs.ConfigBean");
+
     @EJB
     private AdministratorBean administratorBean;
 
@@ -95,7 +99,7 @@ public class ConfigBean {
             sportBean.associateAthlete(sport.getCode(), athlete.getUsername());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, e.getMessage());
         }
     }
 }
