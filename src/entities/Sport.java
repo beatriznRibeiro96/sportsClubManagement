@@ -23,17 +23,27 @@ public class Sport implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "COACH_USERNAME", referencedColumnName =
                     "USERNAME", nullable = false))
     private Set<Coach> coaches;
+    @ManyToMany
+    @JoinTable(name = "SPORTS_ATHLETES",
+            joinColumns = @JoinColumn(name = "SPORT_CODE", referencedColumnName = "CODE", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "ATHLETE_USERNAME", referencedColumnName =
+                    "USERNAME", nullable = false))
+    private Set<Athlete> athletes;
+    @OneToMany(mappedBy = "sport", cascade = CascadeType.REMOVE)
+    private Set<Rank> ranks;
     @Version
     private int version;
 
     public Sport() {
         this.coaches = new LinkedHashSet<>();
+        this.athletes = new LinkedHashSet<>();
+        this.ranks = new LinkedHashSet<>();
     }
 
     public Sport(int code, String name) {
+        this();
         this.code = code;
         this.name = name;
-        this.coaches = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -60,11 +70,43 @@ public class Sport implements Serializable {
         this.coaches = coaches;
     }
 
+    public Set<Athlete> getAthletes() {
+        return athletes;
+    }
+
+    public void setAthletes(Set<Athlete> athletes) {
+        this.athletes = athletes;
+    }
+
+    public Set<Rank> getRanks() {
+        return ranks;
+    }
+
+    public void setRanks(Set<Rank> ranks) {
+        this.ranks = ranks;
+    }
+
     public void addCoach(Coach coach) {
         coaches.add(coach);
     }
 
     public void removeCoach(Coach coach){
         coaches.remove(coach);
+    }
+
+    public void addAthlete(Athlete athlete) {
+        athletes.add(athlete);
+    }
+
+    public void removeAthlete(Athlete athlete){
+        athletes.remove(athlete);
+    }
+
+    public void addRank(Rank rank) {
+        ranks.add(rank);
+    }
+
+    public void removeRank(Rank rank){
+        ranks.remove(rank);
     }
 }

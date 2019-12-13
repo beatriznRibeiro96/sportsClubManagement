@@ -1,5 +1,6 @@
 package ejbs;
 
+import entities.Athlete;
 import entities.Coach;
 import entities.Sport;
 import exceptions.MyEntityExistsException;
@@ -20,6 +21,9 @@ public class SportBean {
 
     @EJB
     private CoachBean coachBean;
+
+    @EJB
+    private AthleteBean athleteBean;
 
     public Sport create (int code, String name) throws MyEntityExistsException {
         if (find(code)!=null){
@@ -78,7 +82,7 @@ public class SportBean {
         }
     }
 
-    public void associate(int sportCode, String coachUsername){
+    public void associateCoach(int sportCode, String coachUsername){
         try{
             Sport sport = find(sportCode);
             Coach coach = coachBean.find(coachUsername);
@@ -89,12 +93,34 @@ public class SportBean {
         }
     }
 
-    public void dissociate(int sportCode, String coachUsername){
+    public void dissociateCoach(int sportCode, String coachUsername){
         try{
             Sport sport = find(sportCode);
             Coach coach = coachBean.find(coachUsername);
             sport.removeCoach(coach);
             coach.removeSport(sport);
+        } catch (Exception e){
+            throw new EJBException("ERROR_DISSOCIATE_COACH", e);
+        }
+    }
+
+    public void associateAthlete(int sportCode, String athleteUsername){
+        try{
+            Sport sport = find(sportCode);
+            Athlete athlete = athleteBean.find(athleteUsername);
+            sport.addAthlete(athlete);
+            athlete.addSport(sport);
+        } catch (Exception e){
+            throw new EJBException("ERROR_ASSOCIATE_ATHLETE", e);
+        }
+    }
+
+    public void dissociateAthlete(int sportCode, String athleteUsername){
+        try{
+            Sport sport = find(sportCode);
+            Athlete athlete = athleteBean.find(athleteUsername);
+            sport.removeAthlete(athlete);
+            athlete.removeSport(sport);
         } catch (Exception e){
             throw new EJBException("ERROR_DISSOCIATE_COACH", e);
         }
