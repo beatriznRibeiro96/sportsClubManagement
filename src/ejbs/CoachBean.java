@@ -1,5 +1,6 @@
 package ejbs;
 
+import entities.ActiveSport;
 import entities.Coach;
 import entities.Sport;
 import exceptions.MyEntityExistsException;
@@ -13,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Set;
 
 @Stateless(name = "CoachEJB")
 public class CoachBean {
@@ -20,7 +22,7 @@ public class CoachBean {
     private EntityManager em;
 
     @EJB
-    private SportBean sportBean;
+    private ActiveSportBean activeSportBean;
 
     public Coach create (String username,String password, String name, String email) throws MyEntityExistsException {
         if (find(username)!=null){
@@ -73,33 +75,39 @@ public class CoachBean {
         if(coach == null){
             throw new MyEntityNotFoundException("ERROR_FINDING_COACH");
         }
+        Set<ActiveSport> activeSports = coach.getActiveSports();
         try{
             em.lock(coach, LockModeType.OPTIMISTIC);
+            if(activeSports != null){
+                for (ActiveSport activeSport:activeSports) {
+                    activeSport.removeCoach(coach);
+                }
+            }
             em.remove(coach);
         }catch (Exception e){
             throw new EJBException("ERROR_DELETING_COACH", e);
         }
     }
 
-    public void associateCoachToSport(String coachUsername, int sportCode){
+    public void associateCoachToActiveSport(String coachUsername, int activeSportCode){
         try{
             Coach coach = find(coachUsername);
-            Sport sport = sportBean.find(sportCode);
-            coach.addSport(sport);
-            sport.addCoach(coach);
+            ActiveSport activeSport = activeSportBean.find(activeSportCode);
+            coach.addActiveSport(activeSport);
+            activeSport.addCoach(coach);
         } catch (Exception e){
-            throw new EJBException("ERROR_ASSOCIATE_COACH_TO_SPORT", e);
+            throw new EJBException("ERROR_ASSOCIATE_COACH_TO_ACTIVE_SPORT", e);
         }
     }
 
-    public void dissociateCoachFromSport(String coachUsername, int sportCode){
+    public void dissociateCoachFromActiveSport(String coachUsername, int activeSportCode){
         try{
             Coach coach = find(coachUsername);
-            Sport sport = sportBean.find(sportCode);
-            coach.removeSport(sport);
-            sport.removeCoach(coach);
+            ActiveSport activeSport = activeSportBean.find(activeSportCode);
+            coach.removeActiveSport(activeSport);
+            activeSport.removeCoach(coach);
         } catch (Exception e){
-            throw new EJBException("ERROR_DISSOCIATE_COACH_FROM_SPORT", e);
+            throw new EJBException("ERROR_DISSOCIATE_COACH_FROM_ACTIVE_SPORT", e);
         }
     }
 }

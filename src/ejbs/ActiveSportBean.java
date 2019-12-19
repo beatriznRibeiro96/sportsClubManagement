@@ -1,6 +1,7 @@
 package ejbs;
 
 import entities.ActiveSport;
+import entities.Coach;
 import entities.Season;
 import entities.Sport;
 import exceptions.MyEntityExistsException;
@@ -23,6 +24,8 @@ public class ActiveSportBean {
     private SportBean sportBean;
     @EJB
     private SeasonBean seasonBean;
+    @EJB
+    private CoachBean coachBean;
 
     public ActiveSport create (int code, String name, int sportCode, int seasonCode) throws MyEntityExistsException, MyEntityNotFoundException {
         if (find(code)!=null){
@@ -97,6 +100,28 @@ public class ActiveSportBean {
             em.remove(activeSport);
         }catch (Exception e){
             throw new EJBException("ERROR_DELETING_ACTIVE_SPORT", e);
+        }
+    }
+
+    public void associateCoach(int activeSportCode, String coachUsername){
+        try{
+            ActiveSport activeSport = find(activeSportCode);
+            Coach coach = coachBean.find(coachUsername);
+            activeSport.addCoach(coach);
+            coach.addActiveSport(activeSport);
+        } catch (Exception e){
+            throw new EJBException("ERROR_ASSOCIATE_COACH", e);
+        }
+    }
+
+    public void dissociateCoach(int activeSportCode, String coachUsername){
+        try{
+            ActiveSport activeSport = find(activeSportCode);
+            Coach coach = coachBean.find(coachUsername);
+            activeSport.removeCoach(coach);
+            coach.removeActiveSport(activeSport);
+        } catch (Exception e){
+            throw new EJBException("ERROR_DISSOCIATE_COACH", e);
         }
     }
 }

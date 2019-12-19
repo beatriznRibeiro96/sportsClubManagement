@@ -66,8 +66,6 @@ public class ConfigBean {
     public void PopulateDB(){
         try {
             Administrator administrator = administratorBean.create("admin1","admin","Joao","joao@mail.pt");
-            Coach coach = coachBean.create("coach1","coach","Joana","joana@mail.pt");
-            Sport sport = sportBean.create(1, "Futebol");
 
             Category category1 = categoryBean.create("Artigo desportivo");
             Category category2 = categoryBean.create("Seguro");
@@ -99,20 +97,26 @@ public class ConfigBean {
             orderBean.setPaymentInOrder(payment1.getId(), order1.getId());
             orderBean.updatePayed(order1.getId());
 
+            //region Atletas, sócios, treinadores e modalidades
+            Coach coach = coachBean.create("coach1","coach","Joana","joana@mail.pt");
             Partner partner = partnerBean.create("partner1", "partner", "Miguel", "miguel@mail.pt");
             Athlete athlete = athleteBean.create("athlete1", "athlete", "Rui", "rui@mail.pt");
+            Athlete athlete2 = athleteBean.create("athlete2", "athlete", "Luís", "luis@mail.pt");
+            Season season = seasonBean.create(1, "18/19");
+            Sport sport = sportBean.create(1, "Futebol");
+            Sport sport2 = sportBean.create(2, "Andebol");
+            ActiveSport activeSport = activeSportBean.create(1, "Futebol-18/19", sport.getCode(), season.getCode());
+            ActiveSport activeSport2 = activeSportBean.create(2, "Andebol-18/19", sport2.getCode(), season.getCode());
+            SportSubscription sportSubscription = sportSubscriptionBean.create(1, activeSport.getCode(), athlete.getUsername());
+            SportSubscription sportSubscription2 = sportSubscriptionBean.create(2, activeSport2.getCode(), athlete.getUsername());
+            SportSubscription sportSubscription3 = sportSubscriptionBean.create(3, activeSport2.getCode(), athlete2.getUsername());
+            activeSportBean.associateCoach(activeSport.getCode(), coach.getUsername());
+            activeSportBean.associateCoach(activeSport2.getCode(), coach.getUsername());
+            //endregion
+            
             Rank rank = rankBean.create(1, "Futebol-Seniores", sport.getCode());
             Rank rank1 = rankBean.create(2, "Futebol-Junior", sport.getCode());
             rankBean.update(rank1.getCode(), "Futebol-Juniores", sport.getCode());
-
-            Season season = seasonBean.create(1, "18/19");
-            ActiveSport activeSport = activeSportBean.create(1, "Futebol-18/19", sport.getCode(), season.getCode());
-            SportSubscription sportSubscription = sportSubscriptionBean.create(1, activeSport.getCode(), athlete.getUsername());
-            Sport sport2 = sportBean.create(2, "Andebol");
-            ActiveSport activeSport2 = activeSportBean.create(2, "Andebol-18/19", sport2.getCode(), season.getCode());
-            Athlete athlete2 = athleteBean.create("athlete2", "athlete", "Luís", "luis@mail.pt");
-            SportSubscription sportSubscription2 = sportSubscriptionBean.create(2, activeSport2.getCode(), athlete.getUsername());
-            SportSubscription sportSubscription3 = sportSubscriptionBean.create(3, activeSport2.getCode(), athlete2.getUsername());
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
         }

@@ -1,6 +1,8 @@
 package dtos;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 public class ActiveSportDTO implements Serializable {
     private int code;
@@ -9,8 +11,10 @@ public class ActiveSportDTO implements Serializable {
     private String sportName;
     private int seasonCode;
     private String seasonName;
+    private Collection<CoachDTO> coaches;
 
     public ActiveSportDTO() {
+        this.coaches = new LinkedHashSet<>();
     }
 
     public ActiveSportDTO(int code, String name, int sportCode, String sportName, int seasonCode, String seasonName) {
@@ -20,6 +24,7 @@ public class ActiveSportDTO implements Serializable {
         this.sportName = sportName;
         this.seasonCode = seasonCode;
         this.seasonName = seasonName;
+        this.coaches = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -68,5 +73,13 @@ public class ActiveSportDTO implements Serializable {
 
     public void setSeasonCode(int seasonCode) {
         this.seasonCode = seasonCode;
+    }
+
+    public Collection<CoachDTO> getCoaches() {
+        return coaches;
+    }
+
+    public void setCoaches(Collection<CoachDTO> coaches) {
+        this.coaches = coaches;
     }
 }

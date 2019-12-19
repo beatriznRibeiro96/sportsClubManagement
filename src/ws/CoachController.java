@@ -1,5 +1,6 @@
 package ws;
 
+import dtos.ActiveSportDTO;
 import dtos.CoachDTO;
 import dtos.SportDTO;
 import ejbs.CoachBean;
@@ -37,12 +38,12 @@ public class CoachController {
                 coach.getEmail()
         );
 
-        coachDTO.setSports(SportController.toDTOs(coach.getSports()));
+        coachDTO.setActiveSports(ActiveSportController.toDTOs(coach.getActiveSports()));
         return coachDTO;
     }
 
     // Converts an entity Coach to a DTO Coach class
-    private CoachDTO toDTONoSports(Coach coach){
+    private CoachDTO toDTONoActiveSports(Coach coach){
         return new CoachDTO(
                 coach.getUsername(),
                 coach.getPassword(),
@@ -52,15 +53,15 @@ public class CoachController {
     }
 
     // converts an entire list of entities into a list of DTOs
-    private List<CoachDTO> toDTOsNoSports(List<Coach> coaches){
-        return coaches.stream().map(this::toDTONoSports).collect(Collectors.toList());
+    private List<CoachDTO> toDTOsNoActiveSports(List<Coach> coaches){
+        return coaches.stream().map(this::toDTONoActiveSports).collect(Collectors.toList());
     }
 
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/coaches/”
     public Response all() {
         try {
-            return Response.status(200).entity(toDTOsNoSports(coachBean.all())).build();
+            return Response.status(200).entity(toDTOsNoActiveSports(coachBean.all())).build();
         } catch (Exception e) {
             throw new EJBException("ERROR_GET_COACHES", e);
         }
@@ -117,13 +118,13 @@ public class CoachController {
 
     @GET
     @Path("{username}/sports")
-    public Response getCoachSports(@PathParam("username") String username) {
+    public Response getCoachActiveSports(@PathParam("username") String username) {
         String msg;
         try {
             Coach coach = coachBean.find(username);
             if (coach != null) {
-                GenericEntity<List<SportDTO>> entity
-                        = new GenericEntity<List<SportDTO>>(SportController.toDTOs(coach.getSports())) {
+                GenericEntity<List<ActiveSportDTO>> entity
+                        = new GenericEntity<List<ActiveSportDTO>>(ActiveSportController.toDTOs(coach.getActiveSports())) {
                 };
                 return Response.status(Response.Status.OK)
                         .entity(entity)
@@ -132,7 +133,7 @@ public class CoachController {
             msg = "ERROR_FINDING_COACH";
             System.err.println(msg);
         } catch (Exception e) {
-            msg = "ERROR_FETCHING_COACH_SPORTS --->" + e.getMessage();
+            msg = "ERROR_FETCHING_COACH_ACTIVE_SPORTS --->" + e.getMessage();
             System.err.println(msg);
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

@@ -1,6 +1,7 @@
 package ws;
 
 import dtos.ActiveSportDTO;
+import dtos.CoachDTO;
 import ejbs.ActiveSportBean;
 import entities.ActiveSport;
 import exceptions.MyEntityExistsException;
@@ -9,6 +10,7 @@ import exceptions.MyEntityNotFoundException;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
@@ -95,5 +97,30 @@ public class ActiveSportController {
     public Response deleteActiveSport (@PathParam("code") int code) throws MyEntityNotFoundException{
         activeSportBean.delete(code);
         return Response.status(Response.Status.OK).build();
+    }
+
+    @GET
+    @Path("{code}/coaches")
+    public Response getActiveSportCoaches(@PathParam("code") int code) {
+        String msg;
+        try {
+            ActiveSport activeSport = activeSportBean.find(code);
+            if (activeSport != null) {
+                GenericEntity<List<CoachDTO>> entity
+                        = new GenericEntity<List<CoachDTO>>(CoachController.toDTOs(activeSport.getCoaches())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_ACTIVE_SPORT";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_ACTIVE_SPORT_COACHES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
     }
 }

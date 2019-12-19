@@ -94,31 +94,6 @@ public class SportController {
     }
 
     @GET
-    @Path("{code}/coaches")
-    public Response getSportCoaches(@PathParam("code") int code) {
-        String msg;
-        try {
-            Sport sport = sportBean.find(code);
-            if (sport != null) {
-                GenericEntity<List<CoachDTO>> entity
-                        = new GenericEntity<List<CoachDTO>>(CoachController.toDTOs(sport.getCoaches())) {
-                };
-                return Response.status(Response.Status.OK)
-                        .entity(entity)
-                        .build();
-            }
-            msg = "ERROR_FINDING_SPORT";
-            System.err.println(msg);
-        } catch (Exception e) {
-            msg = "ERROR_FETCHING_SPORT_COACHES --->" + e.getMessage();
-            System.err.println(msg);
-        }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(msg)
-                .build();
-    }
-
-    @GET
     @Path("{code}/ranks")
     public Response getSportRanks(@PathParam("code") int code) {
         String msg;

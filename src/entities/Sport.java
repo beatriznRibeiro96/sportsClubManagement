@@ -17,19 +17,13 @@ public class Sport implements Serializable {
     @Id
     private int code;
     private String name;
-    @ManyToMany
-    @JoinTable(name = "SPORTS_COACHES",
-            joinColumns = @JoinColumn(name = "SPORT_CODE", referencedColumnName = "CODE", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "COACH_USERNAME", referencedColumnName =
-                    "USERNAME", nullable = false))
-    private Set<Coach> coaches;
+
     @OneToMany(mappedBy = "sport", cascade = CascadeType.REMOVE)
     private Set<Rank> ranks;
     @Version
     private int version;
 
     public Sport() {
-        this.coaches = new LinkedHashSet<>();
         this.ranks = new LinkedHashSet<>();
     }
 
@@ -55,13 +49,7 @@ public class Sport implements Serializable {
         this.name = name;
     }
 
-    public Set<Coach> getCoaches() {
-        return coaches;
-    }
 
-    public void setCoaches(Set<Coach> coaches) {
-        this.coaches = coaches;
-    }
 
     public Set<Rank> getRanks() {
         return ranks;
@@ -69,14 +57,6 @@ public class Sport implements Serializable {
 
     public void setRanks(Set<Rank> ranks) {
         this.ranks = ranks;
-    }
-
-    public void addCoach(Coach coach) {
-        coaches.add(coach);
-    }
-
-    public void removeCoach(Coach coach){
-        coaches.remove(coach);
     }
 
     public void addRank(Rank rank) {

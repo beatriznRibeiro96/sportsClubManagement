@@ -2,6 +2,8 @@ package entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name="ACTIVE_SPORTS")
@@ -22,7 +24,15 @@ public class ActiveSport implements Serializable {
     @ManyToOne
     private Season season;
 
+    @ManyToMany
+    @JoinTable(name = "ACTIVE_SPORTS_COACHES",
+            joinColumns = @JoinColumn(name = "ACTIVE_SPORT_CODE", referencedColumnName = "CODE", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "COACH_USERNAME", referencedColumnName =
+                    "USERNAME", nullable = false))
+    private Set<Coach> coaches;
+
     public ActiveSport() {
+        this.coaches = new LinkedHashSet<>();
     }
 
     public ActiveSport(int code, String name, Sport sport, Season season) {
@@ -30,6 +40,7 @@ public class ActiveSport implements Serializable {
         this.name = name;
         this.sport = sport;
         this.season = season;
+        this.coaches = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -56,11 +67,27 @@ public class ActiveSport implements Serializable {
         this.sport = sport;
     }
 
+    public Set<Coach> getCoaches() {
+        return coaches;
+    }
+
+    public void setCoaches(Set<Coach> coaches) {
+        this.coaches = coaches;
+    }
+
     public Season getSeason() {
         return season;
     }
 
     public void setSeason(Season season) {
         this.season = season;
+    }
+
+    public void addCoach(Coach coach) {
+        coaches.add(coach);
+    }
+
+    public void removeCoach(Coach coach){
+        coaches.remove(coach);
     }
 }

@@ -1,11 +1,9 @@
 package ejbs;
 
-import entities.Coach;
 import entities.Sport;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
-import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -17,9 +15,6 @@ import java.util.List;
 public class SportBean {
     @PersistenceContext
     private EntityManager em;
-
-    @EJB
-    private CoachBean coachBean;
 
     public Sport create (int code, String name) throws MyEntityExistsException {
         if (find(code)!=null){
@@ -75,28 +70,6 @@ public class SportBean {
             em.remove(sport);
         }catch (Exception e){
             throw new EJBException("ERROR_DELETING_SPORT", e);
-        }
-    }
-
-    public void associateCoach(int sportCode, String coachUsername){
-        try{
-            Sport sport = find(sportCode);
-            Coach coach = coachBean.find(coachUsername);
-            sport.addCoach(coach);
-            coach.addSport(sport);
-        } catch (Exception e){
-            throw new EJBException("ERROR_ASSOCIATE_COACH", e);
-        }
-    }
-
-    public void dissociateCoach(int sportCode, String coachUsername){
-        try{
-            Sport sport = find(sportCode);
-            Coach coach = coachBean.find(coachUsername);
-            sport.removeCoach(coach);
-            coach.removeSport(sport);
-        } catch (Exception e){
-            throw new EJBException("ERROR_DISSOCIATE_COACH", e);
         }
     }
 }
