@@ -51,9 +51,6 @@ public class ConfigBean {
     private AthleteBean athleteBean;
 
     @EJB
-    private RankBean rankBean;
-
-    @EJB
     private SeasonBean seasonBean;
 
     @EJB
@@ -115,10 +112,6 @@ public class ConfigBean {
             activeSportBean.associateCoach(activeSport2.getCode(), coach.getUsername());
             activeSportBean.associateCoach(activeSport.getCode(), coach2.getUsername());
             //endregion
-
-            Rank rank = rankBean.create(1, "Futebol-Seniores", sport.getCode());
-            Rank rank1 = rankBean.create(2, "Futebol-Junior", sport.getCode());
-            rankBean.update(rank1.getCode(), "Futebol-Juniores", sport.getCode());
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
         }

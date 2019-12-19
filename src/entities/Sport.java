@@ -18,13 +18,10 @@ public class Sport implements Serializable {
     private int code;
     private String name;
 
-    @OneToMany(mappedBy = "sport", cascade = CascadeType.REMOVE)
-    private Set<Rank> ranks;
     @Version
     private int version;
 
     public Sport() {
-        this.ranks = new LinkedHashSet<>();
     }
 
     public Sport(int code, String name) {
@@ -47,23 +44,5 @@ public class Sport implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-
-
-    public Set<Rank> getRanks() {
-        return ranks;
-    }
-
-    public void setRanks(Set<Rank> ranks) {
-        this.ranks = ranks;
-    }
-
-    public void addRank(Rank rank) {
-        ranks.add(rank);
-    }
-
-    public void removeRank(Rank rank){
-        ranks.remove(rank);
     }
 }
