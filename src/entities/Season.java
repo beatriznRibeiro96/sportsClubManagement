@@ -18,6 +18,8 @@ public class Season implements Serializable {
     @NotNull
     @Column(nullable = false)
     private String name;
+    @Version
+    private int version;
 
     public Season() {
     }

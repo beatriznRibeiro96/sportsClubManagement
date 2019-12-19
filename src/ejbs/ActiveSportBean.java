@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Set;
 
 @Stateless(name = "ActiveSportEJB")
 public class ActiveSportBean {
@@ -95,8 +96,14 @@ public class ActiveSportBean {
         if(activeSport == null){
             throw new MyEntityNotFoundException("ERROR_FINDING_ACTIVE_SPORT");
         }
+        Set<Coach> coaches = activeSport.getCoaches();
         try{
             em.lock(activeSport, LockModeType.OPTIMISTIC);
+            if(coaches != null){
+                for (Coach coach:coaches) {
+                    coach.removeActiveSport(activeSport);
+                }
+            }
             em.remove(activeSport);
         }catch (Exception e){
             throw new EJBException("ERROR_DELETING_ACTIVE_SPORT", e);

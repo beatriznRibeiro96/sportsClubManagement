@@ -25,6 +25,7 @@ public class SportSubscriptionController {
     public static SportSubscriptionDTO toDTO(SportSubscription sportSubscription){
         return new SportSubscriptionDTO(
                 sportSubscription.getCode(),
+                sportSubscription.getName(),
                 sportSubscription.getActiveSport().getCode(),
                 sportSubscription.getActiveSport().getName(),
                 sportSubscription.getAthlete().getUsername()
@@ -72,6 +73,7 @@ public class SportSubscriptionController {
     @Path("/")
     public Response createNewSportSubscription (SportSubscriptionDTO sportSubscriptionDTO) throws MyEntityExistsException, MyEntityNotFoundException {
         SportSubscription sportSubscription = sportSubscriptionBean.create(sportSubscriptionDTO.getCode(),
+                sportSubscriptionDTO.getName(),
                 sportSubscriptionDTO.getActiveSportCode(),
                 sportSubscriptionDTO.getAthleteUsername());
         return Response.status(Response.Status.CREATED).entity(toDTO(sportSubscription)).build();
@@ -81,6 +83,7 @@ public class SportSubscriptionController {
     @Path("{code}")
     public Response updateSportSubscription(@PathParam("code") int code, SportSubscriptionDTO sportSubscriptionDTO) throws MyEntityNotFoundException {
         SportSubscription sportSubscription = sportSubscriptionBean.update(code,
+                sportSubscriptionDTO.getName(),
                 sportSubscriptionDTO.getActiveSportCode(),
                 sportSubscriptionDTO.getAthleteUsername());
         return Response.status(Response.Status.OK).entity(toDTO(sportSubscription)).build();

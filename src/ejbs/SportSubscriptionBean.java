@@ -24,7 +24,7 @@ public class SportSubscriptionBean {
     @EJB
     private AthleteBean athleteBean;
 
-    public SportSubscription create (int code, int activeSportCode, String athleteUsername) throws MyEntityExistsException, MyEntityNotFoundException {
+    public SportSubscription create (int code, String name, int activeSportCode, String athleteUsername) throws MyEntityExistsException, MyEntityNotFoundException {
         if (find(code)!=null){
             throw new MyEntityExistsException("Code '" + code + "' already exists");
         }
@@ -37,7 +37,7 @@ public class SportSubscriptionBean {
             throw new MyEntityNotFoundException("Athlete not found");
         }
         try {
-            SportSubscription sportSubscription = new SportSubscription(code, activeSport, athlete);
+            SportSubscription sportSubscription = new SportSubscription(code, name, activeSport, athlete);
             em.persist(sportSubscription);
             athlete.addSportSubscription(sportSubscription);
             return sportSubscription;
@@ -62,7 +62,7 @@ public class SportSubscriptionBean {
         }
     }
 
-    public SportSubscription update(int code, int activeSportCode, String athleteUsername) throws MyEntityNotFoundException {
+    public SportSubscription update(int code, String name, int activeSportCode, String athleteUsername) throws MyEntityNotFoundException {
         SportSubscription sportSubscription = find(code);
         if(sportSubscription == null){
             throw new MyEntityNotFoundException("ERROR_FINDING_SPORT_SUBSCRIPTION");
@@ -85,6 +85,7 @@ public class SportSubscriptionBean {
             if(sportSubscription.getActiveSport().getCode() != activeSportCode){
                 sportSubscription.setActiveSport(activeSport);
             }
+            sportSubscription.setName(name);
             em.merge(sportSubscription);
             return sportSubscription;
         }catch (Exception e){

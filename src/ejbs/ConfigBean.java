@@ -99,6 +99,7 @@ public class ConfigBean {
 
             //region Atletas, sócios, treinadores e modalidades
             Coach coach = coachBean.create("coach1","coach","Joana","joana@mail.pt");
+            Coach coach2 = coachBean.create("coach2", "coach", "Maria", "maria@mail.pt");
             Partner partner = partnerBean.create("partner1", "partner", "Miguel", "miguel@mail.pt");
             Athlete athlete = athleteBean.create("athlete1", "athlete", "Rui", "rui@mail.pt");
             Athlete athlete2 = athleteBean.create("athlete2", "athlete", "Luís", "luis@mail.pt");
@@ -107,13 +108,14 @@ public class ConfigBean {
             Sport sport2 = sportBean.create(2, "Andebol");
             ActiveSport activeSport = activeSportBean.create(1, "Futebol-18/19", sport.getCode(), season.getCode());
             ActiveSport activeSport2 = activeSportBean.create(2, "Andebol-18/19", sport2.getCode(), season.getCode());
-            SportSubscription sportSubscription = sportSubscriptionBean.create(1, activeSport.getCode(), athlete.getUsername());
-            SportSubscription sportSubscription2 = sportSubscriptionBean.create(2, activeSport2.getCode(), athlete.getUsername());
-            SportSubscription sportSubscription3 = sportSubscriptionBean.create(3, activeSport2.getCode(), athlete2.getUsername());
+            SportSubscription sportSubscription = sportSubscriptionBean.create(1, "Fut18/19-Rui", activeSport.getCode(), athlete.getUsername());
+            SportSubscription sportSubscription2 = sportSubscriptionBean.create(2, "And18/19-Rui", activeSport2.getCode(), athlete.getUsername());
+            SportSubscription sportSubscription3 = sportSubscriptionBean.create(3, "And18/19-Luís", activeSport2.getCode(), athlete2.getUsername());
             activeSportBean.associateCoach(activeSport.getCode(), coach.getUsername());
             activeSportBean.associateCoach(activeSport2.getCode(), coach.getUsername());
+            activeSportBean.associateCoach(activeSport.getCode(), coach2.getUsername());
             //endregion
-            
+
             Rank rank = rankBean.create(1, "Futebol-Seniores", sport.getCode());
             Rank rank1 = rankBean.create(2, "Futebol-Junior", sport.getCode());
             rankBean.update(rank1.getCode(), "Futebol-Juniores", sport.getCode());

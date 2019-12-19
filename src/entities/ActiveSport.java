@@ -6,7 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name="ACTIVE_SPORTS")
+@Table(name="ACTIVE_SPORTS", uniqueConstraints = @UniqueConstraint(columnNames = {"SEASON_CODE", "SPORT_CODE"}))
 @NamedQueries({
         @NamedQuery(
                 name = "getAllActiveSports",
@@ -30,6 +30,8 @@ public class ActiveSport implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "COACH_USERNAME", referencedColumnName =
                     "USERNAME", nullable = false))
     private Set<Coach> coaches;
+    @Version
+    private int version;
 
     public ActiveSport() {
         this.coaches = new LinkedHashSet<>();
