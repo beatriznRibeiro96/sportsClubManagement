@@ -11,10 +11,15 @@ import java.util.Set;
         @NamedQuery(
                 name = "getAllActiveSports",
                 query = "SELECT acs FROM ActiveSport acs ORDER BY acs.name"
+        ),
+        @NamedQuery(
+                name = "countActiveSportBySportAndSeason",
+                query = "SELECT count(acs) FROM ActiveSport acs WHERE acs.sport = :sport AND acs.season = :season"
         )
 })
 public class ActiveSport implements Serializable {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
     private String name;
 
@@ -37,8 +42,7 @@ public class ActiveSport implements Serializable {
         this.coaches = new LinkedHashSet<>();
     }
 
-    public ActiveSport(int code, String name, Sport sport, Season season) {
-        this.code = code;
+    public ActiveSport(String name, Sport sport, Season season) {
         this.name = name;
         this.sport = sport;
         this.season = season;

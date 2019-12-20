@@ -28,10 +28,7 @@ public class ActiveSportBean {
     @EJB
     private CoachBean coachBean;
 
-    public ActiveSport create (int code, String name, int sportCode, int seasonCode) throws MyEntityExistsException, MyEntityNotFoundException {
-        if (find(code)!=null){
-            throw new MyEntityExistsException("Code '" + code + "' already exists");
-        }
+    public ActiveSport create (String name, int sportCode, int seasonCode) throws MyEntityExistsException, MyEntityNotFoundException {
         Sport sport = sportBean.find(sportCode);
         if(sport == null){
             throw new MyEntityNotFoundException("Sport not found");
@@ -40,8 +37,12 @@ public class ActiveSportBean {
         if(season == null){
             throw new MyEntityNotFoundException("Season not found");
         }
+        Long count = (Long) em.createNamedQuery("countActiveSportBySportAndSeason").setParameter("sport", sport).setParameter("season", season).getSingleResult();
+        if(count != 0){
+            throw new MyEntityExistsException("Sport " + sport.getName() + " is already active for season " + season.getName());
+        }
         try {
-            ActiveSport activeSport = new ActiveSport(code, name, sport, season);
+            ActiveSport activeSport = new ActiveSport(name, sport, season);
             em.persist(activeSport);
             return activeSport;
         } catch(Exception e){
@@ -65,7 +66,7 @@ public class ActiveSportBean {
         }
     }
 
-    public ActiveSport update(int code, String name, int sportCode, int seasonCode) throws MyEntityNotFoundException {
+    public ActiveSport update(int code, String name, int sportCode, int seasonCode) throws MyEntityNotFoundException, MyEntityExistsException {
         ActiveSport activeSport = find(code);
         if(activeSport == null){
             throw new MyEntityNotFoundException("ERROR_FINDING_ACTIVE_SPORT");
@@ -78,6 +79,10 @@ public class ActiveSportBean {
         Season season = seasonBean.find(seasonCode);
         if(season == null){
             throw new MyEntityNotFoundException("Season not found");
+        }
+        Long count = (Long) em.createNamedQuery("countActiveSportBySportAndSeason").setParameter("sport", sport).setParameter("season", season).getSingleResult();
+        if(count != 0 && (sportCode != activeSport.getSport().getCode() || seasonCode != activeSport.getSeason().getCode())){
+            throw new MyEntityExistsException(sport.getName() + " is already active for season " + season.getName());
         }
         try{
             em.lock(activeSport, LockModeType.OPTIMISTIC);

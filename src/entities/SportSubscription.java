@@ -9,10 +9,15 @@ import java.io.Serializable;
         @NamedQuery(
                 name = "getAllSportSubscriptions",
                 query = "SELECT ss FROM SportSubscription ss ORDER BY ss.code"
+        ),
+        @NamedQuery(
+                name = "countSportSubscriptionByActiveSportAndAthlete",
+                query = "SELECT count(ss) FROM SportSubscription ss WHERE ss.activeSport = :activeSport AND ss.athlete = :athlete"
         )
 })
 public class SportSubscription implements Serializable {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
     private String name;
     @ManyToOne
@@ -25,8 +30,7 @@ public class SportSubscription implements Serializable {
     public SportSubscription() {
     }
 
-    public SportSubscription(int code, String name, ActiveSport activeSport, Athlete athlete) {
-        this.code = code;
+    public SportSubscription(String name, ActiveSport activeSport, Athlete athlete) {
         this.name = name;
         this.activeSport = activeSport;
         this.athlete = athlete;

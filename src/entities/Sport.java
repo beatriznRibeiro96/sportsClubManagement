@@ -2,19 +2,22 @@ package entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Entity
-@Table(name="SPORTS")
+@Table(name="SPORTS", uniqueConstraints = @UniqueConstraint(columnNames = {"NAME"}))
 @NamedQueries({
         @NamedQuery(
                 name = "getAllSports",
                 query = "SELECT s FROM Sport s ORDER BY s.name"
+        ),
+        @NamedQuery(
+                name = "countSportByName",
+                query = "SELECT count(s) FROM Sport s WHERE s.name = :name"
         )
 })
 public class Sport implements Serializable {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
     private String name;
 
@@ -24,9 +27,8 @@ public class Sport implements Serializable {
     public Sport() {
     }
 
-    public Sport(int code, String name) {
+    public Sport(String name) {
         this();
-        this.code = code;
         this.name = name;
     }
 

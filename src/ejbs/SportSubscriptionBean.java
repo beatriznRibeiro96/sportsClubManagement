@@ -24,10 +24,7 @@ public class SportSubscriptionBean {
     @EJB
     private AthleteBean athleteBean;
 
-    public SportSubscription create (int code, String name, int activeSportCode, String athleteUsername) throws MyEntityExistsException, MyEntityNotFoundException {
-        if (find(code)!=null){
-            throw new MyEntityExistsException("Code '" + code + "' already exists");
-        }
+    public SportSubscription create (String name, int activeSportCode, String athleteUsername) throws MyEntityExistsException, MyEntityNotFoundException {
         ActiveSport activeSport = activeSportBean.find(activeSportCode);
         if(activeSport == null){
             throw new MyEntityNotFoundException("Active Sport not found");
@@ -36,8 +33,12 @@ public class SportSubscriptionBean {
         if(athlete == null){
             throw new MyEntityNotFoundException("Athlete not found");
         }
+        Long count = (Long) em.createNamedQuery("countSportSubscriptionByActiveSportAndAthlete").setParameter("activeSport", activeSport).setParameter("athlete", athlete).getSingleResult();
+        if(count != 0){
+            throw new MyEntityExistsException(athlete.getName() + " has already signed up for " + activeSport.getSport().getName() + " in the " + activeSport.getSeason().getName() +  " season");
+        }
         try {
-            SportSubscription sportSubscription = new SportSubscription(code, name, activeSport, athlete);
+            SportSubscription sportSubscription = new SportSubscription(name, activeSport, athlete);
             em.persist(sportSubscription);
             athlete.addSportSubscription(sportSubscription);
             return sportSubscription;
@@ -62,7 +63,7 @@ public class SportSubscriptionBean {
         }
     }
 
-    public SportSubscription update(int code, String name, int activeSportCode, String athleteUsername) throws MyEntityNotFoundException {
+    public SportSubscription update(int code, String name, int activeSportCode, String athleteUsername) throws MyEntityNotFoundException, MyEntityExistsException {
         SportSubscription sportSubscription = find(code);
         if(sportSubscription == null){
             throw new MyEntityNotFoundException("ERROR_FINDING_SPORT_SUBSCRIPTION");
@@ -74,6 +75,10 @@ public class SportSubscriptionBean {
         Athlete athlete = athleteBean.find(athleteUsername);
         if(athlete == null){
             throw new MyEntityNotFoundException("Athlete not found");
+        }
+        Long count = (Long) em.createNamedQuery("countSportSubscriptionByActiveSportAndAthlete").setParameter("activeSport", activeSport).setParameter("athlete", athlete).getSingleResult();
+        if(count != 0 && (activeSportCode != sportSubscription.getActiveSport().getCode() || !athleteUsername.equals(sportSubscription.getAthlete().getUsername()))){
+            throw new MyEntityExistsException(athlete.getName() + " has already signed up for " + activeSport.getSport().getName() + " in the " + activeSport.getSeason().getName() +  " season");
         }
         try{
             em.lock(sportSubscription, LockModeType.OPTIMISTIC);

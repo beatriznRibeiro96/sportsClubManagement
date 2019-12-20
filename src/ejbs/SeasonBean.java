@@ -16,12 +16,13 @@ public class SeasonBean {
     @PersistenceContext
     private EntityManager em;
 
-    public Season create (int code, String name) throws MyEntityExistsException {
-        if (find(code)!=null){
-            throw new MyEntityExistsException("Code '" + code + "' already exists");
+    public Season create (String name) throws MyEntityExistsException {
+        Long count = (Long) em.createNamedQuery("countSeasonByName").setParameter("name", name).getSingleResult();
+        if(count != 0){
+            throw new MyEntityExistsException("Season " + name + " already exists");
         }
         try {
-            Season season = new Season(code, name);
+            Season season = new Season(name);
             em.persist(season);
             return season;
         } catch(Exception e){
@@ -45,10 +46,14 @@ public class SeasonBean {
         }
     }
 
-    public Season update(int code, String name) throws MyEntityNotFoundException {
+    public Season update(int code, String name) throws MyEntityNotFoundException, MyEntityExistsException {
         Season season = find(code);
         if(season == null){
             throw new MyEntityNotFoundException("ERROR_FINDING_SEASON");
+        }
+        Long count = (Long) em.createNamedQuery("countSeasonByName").setParameter("name", name).getSingleResult();
+        if(count != 0 && season.getName() != name){
+            throw new MyEntityExistsException("Season " + name + " already exists");
         }
         try{
             em.lock(season, LockModeType.OPTIMISTIC);

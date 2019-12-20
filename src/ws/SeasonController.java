@@ -69,14 +69,13 @@ public class SeasonController {
     @POST
     @Path("/")
     public Response createNewSeason (SeasonDTO seasonDTO) throws MyEntityExistsException {
-        Season season = seasonBean.create(seasonDTO.getCode(),
-                seasonDTO.getName());
+        Season season = seasonBean.create(seasonDTO.getName());
         return Response.status(Response.Status.CREATED).entity(toDTO(season)).build();
     }
 
     @PUT
     @Path("{code}")
-    public Response updateSeason(@PathParam("code") int code, SeasonDTO seasonDTO) throws MyEntityNotFoundException {
+    public Response updateSeason(@PathParam("code") int code, SeasonDTO seasonDTO) throws MyEntityNotFoundException, MyEntityExistsException {
         Season season = seasonBean.update(code,
                 seasonDTO.getName());
         return Response.status(Response.Status.OK).entity(toDTO(season)).build();

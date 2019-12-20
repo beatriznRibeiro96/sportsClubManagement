@@ -69,14 +69,13 @@ public class SportController {
     @POST
     @Path("/")
     public Response createNewSport (SportDTO sportDTO) throws MyEntityExistsException {
-        Sport sport = sportBean.create(sportDTO.getCode(),
-                sportDTO.getName());
+        Sport sport = sportBean.create(sportDTO.getName());
         return Response.status(Response.Status.CREATED).entity(toDTO(sport)).build();
     }
 
     @PUT
     @Path("{code}")
-    public Response updateSport(@PathParam("code") int code, SportDTO sportDTO) throws MyEntityNotFoundException {
+    public Response updateSport(@PathParam("code") int code, SportDTO sportDTO) throws MyEntityNotFoundException, MyEntityExistsException {
         Sport sport = sportBean.update(code,
                 sportDTO.getName());
         return Response.status(Response.Status.OK).entity(toDTO(sport)).build();

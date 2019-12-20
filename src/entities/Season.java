@@ -5,15 +5,20 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
-@Table(name="SEASONS")
+@Table(name="SEASONS", uniqueConstraints = @UniqueConstraint(columnNames = {"NAME"}))
 @NamedQueries({
         @NamedQuery(
                 name = "getAllSeasons",
                 query = "SELECT sea FROM Season sea ORDER BY sea.name"
+        ),
+        @NamedQuery(
+                name = "countSeasonByName",
+                query = "SELECT count(sea) FROM Season sea WHERE sea.name = :name"
         )
 })
 public class Season implements Serializable {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
     @NotNull
     @Column(nullable = false)
@@ -24,8 +29,7 @@ public class Season implements Serializable {
     public Season() {
     }
 
-    public Season(int code, String name) {
-        this.code = code;
+    public Season(String name) {
         this.name = name;
     }
 

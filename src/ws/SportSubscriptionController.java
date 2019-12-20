@@ -72,8 +72,7 @@ public class SportSubscriptionController {
     @POST
     @Path("/")
     public Response createNewSportSubscription (SportSubscriptionDTO sportSubscriptionDTO) throws MyEntityExistsException, MyEntityNotFoundException {
-        SportSubscription sportSubscription = sportSubscriptionBean.create(sportSubscriptionDTO.getCode(),
-                sportSubscriptionDTO.getName(),
+        SportSubscription sportSubscription = sportSubscriptionBean.create(sportSubscriptionDTO.getName(),
                 sportSubscriptionDTO.getActiveSportCode(),
                 sportSubscriptionDTO.getAthleteUsername());
         return Response.status(Response.Status.CREATED).entity(toDTO(sportSubscription)).build();
@@ -81,7 +80,7 @@ public class SportSubscriptionController {
 
     @PUT
     @Path("{code}")
-    public Response updateSportSubscription(@PathParam("code") int code, SportSubscriptionDTO sportSubscriptionDTO) throws MyEntityNotFoundException {
+    public Response updateSportSubscription(@PathParam("code") int code, SportSubscriptionDTO sportSubscriptionDTO) throws MyEntityNotFoundException, MyEntityExistsException {
         SportSubscription sportSubscription = sportSubscriptionBean.update(code,
                 sportSubscriptionDTO.getName(),
                 sportSubscriptionDTO.getActiveSportCode(),
