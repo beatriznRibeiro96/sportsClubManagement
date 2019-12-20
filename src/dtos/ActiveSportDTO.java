@@ -12,9 +12,11 @@ public class ActiveSportDTO implements Serializable {
     private int seasonCode;
     private String seasonName;
     private Collection<CoachDTO> coaches;
+    private Collection<RankDTO> ranks;
 
     public ActiveSportDTO() {
         this.coaches = new LinkedHashSet<>();
+        this.ranks = new LinkedHashSet<>();
     }
 
     public ActiveSportDTO(int code, String name, int sportCode, String sportName, int seasonCode, String seasonName) {
@@ -25,6 +27,7 @@ public class ActiveSportDTO implements Serializable {
         this.seasonCode = seasonCode;
         this.seasonName = seasonName;
         this.coaches = new LinkedHashSet<>();
+        this.ranks = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -81,5 +84,13 @@ public class ActiveSportDTO implements Serializable {
 
     public void setCoaches(Collection<CoachDTO> coaches) {
         this.coaches = coaches;
+    }
+
+    public Collection<RankDTO> getRanks() {
+        return ranks;
+    }
+
+    public void setRanks(Collection<RankDTO> ranks) {
+        this.ranks = ranks;
     }
 }

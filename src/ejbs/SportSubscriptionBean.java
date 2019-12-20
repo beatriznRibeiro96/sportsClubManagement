@@ -87,9 +87,7 @@ public class SportSubscriptionBean {
                 athlete.addSportSubscription(sportSubscription);
                 sportSubscription.setAthlete(athlete);
             }
-            if(sportSubscription.getActiveSport().getCode() != activeSportCode){
-                sportSubscription.setActiveSport(activeSport);
-            }
+            sportSubscription.setActiveSport(activeSport);
             sportSubscription.setName(name);
             em.merge(sportSubscription);
             return sportSubscription;

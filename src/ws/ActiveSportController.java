@@ -2,6 +2,7 @@ package ws;
 
 import dtos.ActiveSportDTO;
 import dtos.CoachDTO;
+import dtos.RankDTO;
 import ejbs.ActiveSportBean;
 import entities.ActiveSport;
 import exceptions.MyEntityExistsException;
@@ -116,6 +117,31 @@ public class ActiveSportController {
             System.err.println(msg);
         } catch (Exception e) {
             msg = "ERROR_FETCHING_ACTIVE_SPORT_COACHES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
+
+    @GET
+    @Path("{code}/ranks")
+    public Response getActiveSportRanks(@PathParam("code") int code) {
+        String msg;
+        try {
+            ActiveSport activeSport = activeSportBean.find(code);
+            if (activeSport != null) {
+                GenericEntity<List<RankDTO>> entity
+                        = new GenericEntity<List<RankDTO>>(RankController.toDTOs(activeSport.getRanks())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_ACTIVE_SPORT";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_ACTIVE_SPORT_RANKS --->" + e.getMessage();
             System.err.println(msg);
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
