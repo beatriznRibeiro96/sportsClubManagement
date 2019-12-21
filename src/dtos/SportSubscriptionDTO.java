@@ -8,16 +8,18 @@ public class SportSubscriptionDTO implements Serializable {
     private int activeSportCode;
     private String activeSportName;
     private String athleteUsername;
+    private String athleteName;
 
     public SportSubscriptionDTO() {
     }
 
-    public SportSubscriptionDTO(int code, String name, int activeSportCode, String activeSportName, String athleteUsername) {
+    public SportSubscriptionDTO(int code, String name, int activeSportCode, String activeSportName, String athleteUsername, String athleteName) {
         this.code = code;
         this.name = name;
         this.activeSportCode = activeSportCode;
         this.activeSportName = activeSportName;
         this.athleteUsername = athleteUsername;
+        this.athleteName = athleteName;
     }
 
     public int getCode() {
@@ -58,5 +60,13 @@ public class SportSubscriptionDTO implements Serializable {
 
     public void setAthleteUsername(String athleteUsername) {
         this.athleteUsername = athleteUsername;
+    }
+
+    public String getAthleteName() {
+        return athleteName;
+    }
+
+    public void setAthleteName(String athleteName) {
+        this.athleteName = athleteName;
     }
 }

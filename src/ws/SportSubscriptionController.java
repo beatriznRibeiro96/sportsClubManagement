@@ -28,7 +28,8 @@ public class SportSubscriptionController {
                 sportSubscription.getName(),
                 sportSubscription.getActiveSport().getCode(),
                 sportSubscription.getActiveSport().getName(),
-                sportSubscription.getAthlete().getUsername()
+                sportSubscription.getAthlete().getUsername(),
+                sportSubscription.getAthlete().getName()
         );
     }
 
