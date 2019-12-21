@@ -1,8 +1,9 @@
 package entities;
 
-import com.sun.istack.internal.NotNull;
+import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -23,15 +24,16 @@ public abstract class User implements Serializable {
     @Id
     protected String username;
 
-    @NotNull
+    @NotNull(message = "password is mandatory")
     @Column(nullable = false)
     protected String password;
 
-    @NotNull
+    @NotNull(message = "name is mandatory")
     @Column(nullable = false)
     protected String name;
 
-    @NotNull
+    @Email
+    @NotNull(message = "email is mandatory")
     @Column(nullable = false)
     protected String email;
 

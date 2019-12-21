@@ -20,7 +20,7 @@ public class Season implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
-    @NotNull
+    @NotNull(message = "name is mandatory")
     @Column(nullable = false)
     private String name;
     @Version

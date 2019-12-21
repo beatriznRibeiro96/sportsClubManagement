@@ -1,6 +1,7 @@
 package entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
@@ -19,9 +20,17 @@ public class Rank implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
+    @NotNull(message = "name is mandatory")
+    @Column(nullable = false)
     private String name;
+    @NotNull(message = "minimum age is mandatory")
+    @Column(nullable = false)
     private int idadeMin;
+    @NotNull(message = "maximum age is mandatory")
+    @Column(nullable = false)
     private int idadeMax;
+    @NotNull(message = "active sport is mandatory")
+    @JoinColumn(nullable = false)
     @ManyToOne
     private ActiveSport activeSport;
 

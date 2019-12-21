@@ -1,6 +1,7 @@
 package entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
@@ -19,9 +20,15 @@ public class SportSubscription implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
+    @NotNull(message = "name is mandatory")
+    @Column(nullable = false)
     private String name;
+    @NotNull(message = "active sport is mandatory")
+    @JoinColumn(nullable = false)
     @ManyToOne
     private ActiveSport activeSport;
+    @NotNull(message = "athlete is mandatory")
+    @JoinColumn(nullable = false)
     @ManyToOne
     private Athlete athlete;
     @Version

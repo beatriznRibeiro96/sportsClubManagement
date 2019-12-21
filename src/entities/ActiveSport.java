@@ -1,6 +1,7 @@
 package entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -21,11 +22,15 @@ public class ActiveSport implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
+    @NotNull(message = "name is mandatory")
+    @Column(nullable = false)
     private String name;
-
+    @NotNull(message = "sport is mandatory")
+    @JoinColumn(nullable = false)
     @ManyToOne
     private Sport sport;
-
+    @NotNull(message = "season is mandatory")
+    @JoinColumn(nullable = false)
     @ManyToOne
     private Season season;
 

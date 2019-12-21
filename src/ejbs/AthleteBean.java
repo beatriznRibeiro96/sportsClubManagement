@@ -17,9 +17,6 @@ public class AthleteBean {
     @PersistenceContext
     private EntityManager em;
 
-    @EJB
-    private SportSubscriptionBean sportSubscriptionBean;
-
     public Athlete create(String username, String password, String name, String email) throws MyEntityExistsException {
         if(find(username) != null){
             throw new MyEntityExistsException("Username '" + username + "' already taken");
