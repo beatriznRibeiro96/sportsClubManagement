@@ -78,7 +78,7 @@ public class SportSubscriptionBean {
         }
         Long count = (Long) em.createNamedQuery("countSportSubscriptionByActiveSportAndAthlete").setParameter("activeSport", activeSport).setParameter("athlete", athlete).getSingleResult();
         if(count != 0 && (activeSportCode != sportSubscription.getActiveSport().getCode() || !athleteUsername.equals(sportSubscription.getAthlete().getUsername()))){
-            throw new MyEntityExistsException(athlete.getName() + " has already signed up for " + activeSport.getSport().getName() + " in the " + activeSport.getSeason().getName() +  " season");
+            throw new MyEntityExistsException(athleteUsername + " has already signed up for " + activeSport.getSport().getName() + " in the " + activeSport.getSeason().getName() +  " season");
         }
         try{
             em.lock(sportSubscription, LockModeType.OPTIMISTIC);

@@ -68,7 +68,7 @@ public class RankBean {
         }
         Long count = (Long) em.createNamedQuery("countRanksByNameAndActiveSport").setParameter("name", name).setParameter("activeSport", activeSport).getSingleResult();
         if(count != 0 && (!name.equals(rank.getName()) || activeSportCode != rank.getActiveSport().getCode())){
-            throw new MyEntityExistsException(activeSport.getName() + " already has " + rank.getName());
+            throw new MyEntityExistsException(activeSport.getName() + " already has " + name);
         }
         try{
             em.lock(activeSport, LockModeType.OPTIMISTIC);
