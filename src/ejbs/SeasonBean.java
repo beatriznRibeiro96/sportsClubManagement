@@ -52,7 +52,7 @@ public class SeasonBean {
             throw new MyEntityNotFoundException("ERROR_FINDING_SEASON");
         }
         Long count = (Long) em.createNamedQuery("countSeasonByName").setParameter("name", name).getSingleResult();
-        if(count != 0 && season.getName() != name){
+        if(count != 0 && !name.equals(season.getName())){
             throw new MyEntityExistsException("Season " + name + " already exists");
         }
         try{
