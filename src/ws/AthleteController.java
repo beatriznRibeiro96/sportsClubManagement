@@ -7,6 +7,7 @@ import entities.Athlete;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
+import exceptions.MyParseDateException;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -14,6 +15,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,7 +37,8 @@ public class AthleteController {
                 athlete.getUsername(),
                 athlete.getPassword(),
                 athlete.getName(),
-                athlete.getEmail()
+                athlete.getEmail(),
+                athlete.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
 
         athleteDTO.setSportSubscriptions(SportSubscriptionController.toDTOs(athlete.getSportSubscriptions()));
@@ -48,7 +51,8 @@ public class AthleteController {
                 athlete.getUsername(),
                 athlete.getPassword(),
                 athlete.getName(),
-                athlete.getEmail()
+                athlete.getEmail(),
+                athlete.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
     }
 
@@ -87,21 +91,23 @@ public class AthleteController {
 
     @POST
     @Path("/")
-    public Response createNewAthlete (AthleteDTO athleteDTO) throws MyEntityExistsException, MyConstraintViolationException {
+    public Response createNewAthlete (AthleteDTO athleteDTO) throws MyEntityExistsException, MyConstraintViolationException, MyParseDateException {
         Athlete athlete = athleteBean.create(athleteDTO.getUsername(),
                 athleteDTO.getPassword(),
                 athleteDTO.getName(),
-                athleteDTO.getEmail());
+                athleteDTO.getEmail(),
+                athleteDTO.getBirthDate());
         return Response.status(Response.Status.OK).entity(toDTO(athlete)).build();
     }
 
     @PUT
     @Path("{username}")
-    public Response updateAthlete(@PathParam("username") String username, AthleteDTO athleteDTO) throws MyEntityNotFoundException{
+    public Response updateAthlete(@PathParam("username") String username, AthleteDTO athleteDTO) throws MyEntityNotFoundException, MyParseDateException {
         Athlete athlete = athleteBean.update(username,
                 athleteDTO.getPassword(),
                 athleteDTO.getName(),
-                athleteDTO.getEmail());
+                athleteDTO.getEmail(),
+                athleteDTO.getBirthDate());
         return Response.status(Response.Status.OK).entity(toDTO(athlete)).build();
     }
 

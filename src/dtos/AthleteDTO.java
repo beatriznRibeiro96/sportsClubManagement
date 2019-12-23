@@ -11,8 +11,8 @@ public class AthleteDTO extends PartnerDTO implements Serializable {
         this.sportSubscriptions = new LinkedHashSet<>();
     }
 
-    public AthleteDTO(String username, String password, String name, String email) {
-        super(username, password, name, email);
+    public AthleteDTO(String username, String password, String name, String email, String birthDate) {
+        super(username, password, name, email, birthDate);
         this.sportSubscriptions = new LinkedHashSet<>();
     }
 

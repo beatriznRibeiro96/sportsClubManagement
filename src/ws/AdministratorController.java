@@ -6,6 +6,7 @@ import entities.Administrator;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
+import exceptions.MyParseDateException;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.security.Principal;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +35,8 @@ public class AdministratorController {
                 administrator.getUsername(),
                 administrator.getPassword(),
                 administrator.getName(),
-                administrator.getEmail()
+                administrator.getEmail(),
+                administrator.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
     }
 
@@ -55,6 +58,7 @@ public class AdministratorController {
         try {
             Administrator administrator = administratorBean.find(username);
             if (administrator != null) {
+                AdministratorDTO administratorDTO = toDTO(administrator);
                 return Response.status(Response.Status.OK)
                         .entity(toDTO(administrator))
                         .build();
@@ -72,18 +76,19 @@ public class AdministratorController {
 
     @POST
     @Path("/")
-    public Response createNewAdministrator (AdministratorDTO administratorDTO) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
-        Administrator administrator = administratorBean.create(administratorDTO.getUsername(), administratorDTO.getPassword(), administratorDTO.getName(), administratorDTO.getEmail());
+    public Response createNewAdministrator (AdministratorDTO administratorDTO) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException, MyParseDateException {
+        Administrator administrator = administratorBean.create(administratorDTO.getUsername(), administratorDTO.getPassword(), administratorDTO.getName(), administratorDTO.getEmail(), administratorDTO.getBirthDate());
         return Response.status(Response.Status.OK).entity(toDTO(administrator)).build();
     }
 
     @PUT
     @Path("{username}")
-    public Response updateAdministrator(@PathParam("username") String username, AdministratorDTO administratorDTO) throws MyEntityNotFoundException{
+    public Response updateAdministrator(@PathParam("username") String username, AdministratorDTO administratorDTO) throws MyEntityNotFoundException, MyParseDateException {
         Administrator administrator = administratorBean.update(username,
                 administratorDTO.getPassword(),
                 administratorDTO.getName(),
-                administratorDTO.getEmail());
+                administratorDTO.getEmail(),
+                administratorDTO.getBirthDate());
         return Response.status(Response.Status.OK).entity(toDTO(administrator)).build();
     }
 

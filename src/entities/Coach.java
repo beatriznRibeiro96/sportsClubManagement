@@ -2,6 +2,7 @@ package entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -20,8 +21,8 @@ public class Coach extends User implements Serializable {
         this.activeSports = new LinkedHashSet<>();
     }
 
-    public Coach(String username, String password, String name, String email) {
-        super(username, password, name, email);
+    public Coach(String username, String password, String name, String email, LocalDate birthDate) {
+        super(username, password, name, email, birthDate);
         this.activeSports = new LinkedHashSet<>();
     }
 

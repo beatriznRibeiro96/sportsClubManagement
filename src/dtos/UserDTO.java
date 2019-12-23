@@ -8,21 +8,24 @@ public abstract class UserDTO implements Serializable {
     private String password;
     private String name;
     private String email;
+    private String birthDate;
 
     public UserDTO() {
     }
 
-    public UserDTO(String username, String password, String name, String email) {
+    public UserDTO(String username, String password, String name, String email, String birthDate) {
         this.username = username;
         this.password = password;
         this.name = name;
         this.email = email;
+        this.birthDate = birthDate;
     }
     public void reset() {
         setUsername(null);
         setPassword(null);
         setName(null);
         setEmail(null);
+        setBirthDate(null);
     }
 
     public String getUsername() {
@@ -56,4 +59,13 @@ public abstract class UserDTO implements Serializable {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(String birthDate) {
+        this.birthDate = birthDate;
+    }
+
 }

@@ -8,6 +8,7 @@ import entities.Coach;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
+import exceptions.MyParseDateException;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -15,6 +16,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,7 +38,8 @@ public class CoachController {
                 coach.getUsername(),
                 coach.getPassword(),
                 coach.getName(),
-                coach.getEmail()
+                coach.getEmail(),
+                coach.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
 
         coachDTO.setActiveSports(ActiveSportController.toDTOs(coach.getActiveSports()));
@@ -49,7 +52,8 @@ public class CoachController {
                 coach.getUsername(),
                 coach.getPassword(),
                 coach.getName(),
-                coach.getEmail()
+                coach.getEmail(),
+                coach.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
     }
 
@@ -88,21 +92,23 @@ public class CoachController {
 
     @POST
     @Path("/")
-    public Response createNewCoach (CoachDTO coachDTO) throws MyEntityExistsException, MyConstraintViolationException {
+    public Response createNewCoach (CoachDTO coachDTO) throws MyEntityExistsException, MyConstraintViolationException, MyParseDateException {
         Coach coach = coachBean.create(coachDTO.getUsername(),
                 coachDTO.getPassword(),
                 coachDTO.getName(),
-                coachDTO.getEmail());
+                coachDTO.getEmail(),
+                coachDTO.getBirthDate());
         return Response.status(Response.Status.CREATED).entity(toDTO(coach)).build();
     }
 
     @PUT
     @Path("{username}")
-    public Response updateCoach(@PathParam("username") String username, CoachDTO coachDTO) throws MyEntityNotFoundException {
+    public Response updateCoach(@PathParam("username") String username, CoachDTO coachDTO) throws MyEntityNotFoundException, MyParseDateException {
         Coach coach = coachBean.update(username,
                 coachDTO.getPassword(),
                 coachDTO.getName(),
-                coachDTO.getEmail());
+                coachDTO.getEmail(),
+                coachDTO.getBirthDate());
         return Response.status(Response.Status.OK).entity(toDTO(coach)).build();
     }
 

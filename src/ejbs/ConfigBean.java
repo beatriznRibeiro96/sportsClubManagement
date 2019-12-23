@@ -65,7 +65,7 @@ public class ConfigBean {
     @PostConstruct
     public void PopulateDB(){
         try {
-            Administrator administrator = administratorBean.create("admin1","admin","Joao","joao@mail.pt");
+            Administrator administrator = administratorBean.create("admin1","admin","Joao","joao@mail.pt", "1989-03-12");
 
             Category category1 = categoryBean.create("Artigo desportivo");
             Category category2 = categoryBean.create("Seguro");
@@ -98,11 +98,11 @@ public class ConfigBean {
             orderBean.updatePayed(order1.getId());
 
             //region Atletas, sócios, treinadores e modalidades
-            Coach coach = coachBean.create("coach1","coach","Joana","joana@mail.pt");
-            Coach coach2 = coachBean.create("coach2", "coach", "Maria", "maria@mail.pt");
-            Partner partner = partnerBean.create("partner1", "partner", "Miguel", "miguel@mail.pt");
-            Athlete athlete = athleteBean.create("athlete1", "athlete", "Rui", "rui@mail.pt");
-            Athlete athlete2 = athleteBean.create("athlete2", "athlete", "Luís", "luis@mail.pt");
+            Coach coach = coachBean.create("coach1","coach","Joana","joana@mail.pt", "1990-05-20");
+            Coach coach2 = coachBean.create("coach2", "coach", "Maria", "maria@mail.pt", "1997-04-07");
+            Partner partner = partnerBean.create("partner1", "partner", "Miguel", "miguel@mail.pt", "1987-09-23");
+            Athlete athlete = athleteBean.create("athlete1", "athlete", "Rui", "rui@mail.pt", "1995-11-30");
+            Athlete athlete2 = athleteBean.create("athlete2", "athlete", "Luís", "luis@mail.pt", "1997-02-17");
             Season season = seasonBean.create("18/19");
             Sport sport = sportBean.create("Futebol");
             Sport sport2 = sportBean.create("Andebol");

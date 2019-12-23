@@ -10,8 +10,8 @@ public class CoachDTO extends UserDTO implements Serializable {
         this.activeSports = new LinkedHashSet<>();
     }
 
-    public CoachDTO(String username, String password, String name, String email) {
-        super(username, password, name, email);
+    public CoachDTO(String username, String password, String name, String email, String birthDate) {
+        super(username, password, name, email, birthDate);
         this.activeSports = new LinkedHashSet<>();
     }
 

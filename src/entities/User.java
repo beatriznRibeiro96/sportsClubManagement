@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -12,6 +13,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -39,6 +42,11 @@ public abstract class User implements Serializable {
     @Column(nullable = false)
     protected String email;
 
+    @NotNull(message = "birth date is mandatory")
+    @Column(nullable = false)
+    @Past(message = "birth date needs to be before today")
+    protected LocalDate birthDate;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Set<Order> orders;
 
@@ -50,12 +58,13 @@ public abstract class User implements Serializable {
         orders = new LinkedHashSet<>();
     }
 
-    public User(String username, String password, String name, String email) {
+    public User(String username, String password, String name, String email, LocalDate birthDate) {
         this();
         this.username = username;
         this.password = hashPassword(password);
         this.name = name;
         this.email = email;
+        this.birthDate = birthDate;
     }
 
     public String getUsername() {
@@ -96,6 +105,18 @@ public abstract class User implements Serializable {
 
     public void setOrders(Set<Order> orders) {
         this.orders = orders;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public int age(){
+        return Period.between(this.birthDate, LocalDate.now()).getYears();
     }
 
     public static String hashPassword(String password) {
