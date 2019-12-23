@@ -1,5 +1,7 @@
 package entities;
 
+import org.hibernate.validator.constraints.NotBlank;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -20,7 +22,7 @@ public class Season implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
-    @NotNull(message = "name is mandatory")
+    @NotBlank(message = "name is mandatory")
     @Column(nullable = false)
     private String name;
     @Version

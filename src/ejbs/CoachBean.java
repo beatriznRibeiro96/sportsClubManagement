@@ -3,8 +3,7 @@ package ejbs;
 import entities.ActiveSport;
 import entities.Coach;
 import entities.Sport;
-import exceptions.MyEntityExistsException;
-import exceptions.MyEntityNotFoundException;
+import exceptions.*;
 
 
 import javax.ejb.EJB;
@@ -13,6 +12,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.Set;
 
@@ -24,14 +24,18 @@ public class CoachBean {
     @EJB
     private ActiveSportBean activeSportBean;
 
-    public Coach create (String username,String password, String name, String email) throws MyEntityExistsException {
-        if (find(username)!=null){
-            throw new MyEntityExistsException("Username '" + username + "' already exists");
-        }
+    public Coach create (String username,String password, String name, String email) throws MyEntityExistsException, MyConstraintViolationException {
         try {
+            if (find(username)!=null){
+                throw new MyEntityExistsException("Username '" + username + "' already exists");
+            }
             Coach coach = new Coach(username, password, name, email);
             em.persist(coach);
             return coach;
+        } catch(MyEntityExistsException e){
+            throw e;
+        } catch(ConstraintViolationException e) {
+            throw new MyConstraintViolationException(Utils.getConstraintViolationMessages(e));
         } catch(Exception e){
             throw new EJBException("ERROR_CREATING_COACH", e);
         }
@@ -54,58 +58,80 @@ public class CoachBean {
     }
 
     public Coach update(String username, String password, String name, String email) throws MyEntityNotFoundException {
-        Coach coach = find(username);
-        if(coach == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_COACH");
-        }
         try{
+            Coach coach = find(username);
             em.lock(coach, LockModeType.OPTIMISTIC);
+            if(coach == null){
+                throw new MyEntityNotFoundException("Username '" + username + "' not found.");
+            }
             coach.setName(name);
             coach.setEmail(email);
             coach.setPassword(password);
             em.merge(coach);
             return coach;
-        }catch (Exception e){
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
             throw new EJBException("ERROR_UPDATING_COACH", e);
         }
     }
 
     public void delete(String username) throws MyEntityNotFoundException {
-        Coach coach = find(username);
-        if(coach == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_COACH");
-        }
-        Set<ActiveSport> activeSports = coach.getActiveSports();
         try{
-            em.lock(coach, LockModeType.OPTIMISTIC);
+            Coach coach = find(username);
+            if(coach == null){
+                throw new MyEntityNotFoundException("Username '" + username + "' not found.");
+            }
+            Set<ActiveSport> activeSports = coach.getActiveSports();
             if(activeSports != null){
                 for (ActiveSport activeSport:activeSports) {
                     activeSport.removeCoach(coach);
                 }
             }
             em.remove(coach);
-        }catch (Exception e){
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
             throw new EJBException("ERROR_DELETING_COACH", e);
         }
     }
 
-    public void associateCoachToActiveSport(String coachUsername, int activeSportCode){
+    public void associateCoachToActiveSport(String coachUsername, int activeSportCode) throws MyEntityNotFoundException, MyIllegalArgumentException {
         try{
             Coach coach = find(coachUsername);
+            if (coach == null) {
+                throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
+            }
             ActiveSport activeSport = activeSportBean.find(activeSportCode);
+            if (activeSport == null) {
+                throw new MyEntityNotFoundException("Active Sport not found.");
+            }
+            if(coach.getActiveSports().contains(activeSport)){
+                throw new MyIllegalArgumentException("Coach is already enrolled in active sport with code '" + activeSportCode + "'");
+            }
             coach.addActiveSport(activeSport);
             activeSport.addCoach(coach);
+        } catch (MyEntityNotFoundException | MyIllegalArgumentException e) {
+            throw e;
         } catch (Exception e){
             throw new EJBException("ERROR_ASSOCIATE_COACH_TO_ACTIVE_SPORT", e);
         }
     }
 
-    public void dissociateCoachFromActiveSport(String coachUsername, int activeSportCode){
+    public void dissociateCoachFromActiveSport(String coachUsername, int activeSportCode) throws MyEntityNotFoundException {
         try{
             Coach coach = find(coachUsername);
+            if (coach == null) {
+                throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
+            }
             ActiveSport activeSport = activeSportBean.find(activeSportCode);
-            coach.removeActiveSport(activeSport);
+            if (activeSport == null) {
+                throw new MyEntityNotFoundException("Active Sport not found.");
+            }
             activeSport.removeCoach(coach);
+            coach.removeActiveSport(activeSport);
+        } catch (MyEntityNotFoundException e) {
+            throw e;
         } catch (Exception e){
             throw new EJBException("ERROR_DISSOCIATE_COACH_FROM_ACTIVE_SPORT", e);
         }

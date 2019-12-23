@@ -3,6 +3,7 @@ package ws;
 import dtos.SportDTO;
 import ejbs.SportBean;
 import entities.Sport;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
@@ -37,11 +38,7 @@ public class SportController {
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/sports/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOs(sportBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_SPORTS", e);
-        }
+        return Response.status(200).entity(toDTOs(sportBean.all())).build();
     }
 
     @GET
@@ -68,7 +65,7 @@ public class SportController {
 
     @POST
     @Path("/")
-    public Response createNewSport (SportDTO sportDTO) throws MyEntityExistsException {
+    public Response createNewSport (SportDTO sportDTO) throws MyEntityExistsException, MyConstraintViolationException {
         Sport sport = sportBean.create(sportDTO.getName());
         return Response.status(Response.Status.CREATED).entity(toDTO(sport)).build();
     }

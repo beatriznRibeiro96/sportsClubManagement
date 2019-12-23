@@ -5,6 +5,7 @@ import dtos.CoachDTO;
 import dtos.SportDTO;
 import ejbs.CoachBean;
 import entities.Coach;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
@@ -60,11 +61,7 @@ public class CoachController {
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/coaches/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOsNoActiveSports(coachBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_COACHES", e);
-        }
+        return Response.status(200).entity(toDTOsNoActiveSports(coachBean.all())).build();
     }
 
     @GET
@@ -91,7 +88,7 @@ public class CoachController {
 
     @POST
     @Path("/")
-    public Response createNewCoach (CoachDTO coachDTO) throws MyEntityExistsException {
+    public Response createNewCoach (CoachDTO coachDTO) throws MyEntityExistsException, MyConstraintViolationException {
         Coach coach = coachBean.create(coachDTO.getUsername(),
                 coachDTO.getPassword(),
                 coachDTO.getName(),

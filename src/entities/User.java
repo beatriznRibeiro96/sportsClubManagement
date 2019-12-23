@@ -1,6 +1,7 @@
 package entities;
 
 import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -17,23 +18,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Entity
-@Table(name ="USERS")
+@Table(name ="USERS", uniqueConstraints = @UniqueConstraint(columnNames = {"EMAIL"}))
 @MappedSuperclass
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class User implements Serializable {
     @Id
+    @NotBlank(message = "username is mandatory")
     protected String username;
 
-    @NotNull(message = "password is mandatory")
+    @NotBlank(message = "password is mandatory")
     @Column(nullable = false)
     protected String password;
 
-    @NotNull(message = "name is mandatory")
+    @NotBlank(message = "name is mandatory")
     @Column(nullable = false)
     protected String name;
 
     @Email
-    @NotNull(message = "email is mandatory")
+    @NotBlank(message = "email is mandatory")
     @Column(nullable = false)
     protected String email;
 
@@ -97,6 +99,8 @@ public abstract class User implements Serializable {
     }
 
     public static String hashPassword(String password) {
+        if(password == null || password.equals(""))
+            return null;
         char[] encoded = null;
         try {
             ByteBuffer passwdBuffer =

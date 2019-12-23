@@ -3,14 +3,18 @@ package ws;
 import dtos.AdministratorDTO;
 import ejbs.AdministratorBean;
 import entities.Administrator;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +25,8 @@ import java.util.stream.Collectors;
 public class AdministratorController {
     @EJB
     private AdministratorBean administratorBean;
+    @Context
+    private SecurityContext securityContext;
 
     private AdministratorDTO toDTO(Administrator administrator) {
         return new AdministratorDTO(
@@ -39,11 +45,7 @@ public class AdministratorController {
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/administrators/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOs(administratorBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_ADMINISTRATORS", e);
-        }
+        return Response.status(200).entity(toDTOs(administratorBean.all())).build();
     }
 
     @GET
@@ -70,14 +72,9 @@ public class AdministratorController {
 
     @POST
     @Path("/")
-    public Response createNewAdministrator (AdministratorDTO administratorDTO) throws MyEntityExistsException, MyEntityNotFoundException {
-
-        administratorBean.create(administratorDTO.getUsername(), administratorDTO.getPassword(), administratorDTO.getName(), administratorDTO.getEmail());
-        try{
-            return Response.status(Response.Status.CREATED).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_CREATING_STUDENT", e);
-        }
+    public Response createNewAdministrator (AdministratorDTO administratorDTO) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
+        Administrator administrator = administratorBean.create(administratorDTO.getUsername(), administratorDTO.getPassword(), administratorDTO.getName(), administratorDTO.getEmail());
+        return Response.status(Response.Status.OK).entity(toDTO(administrator)).build();
     }
 
     @PUT
@@ -93,7 +90,11 @@ public class AdministratorController {
     @DELETE
     @Path("{username}")
     public Response deleteAdministrator (@PathParam("username") String username) throws MyEntityNotFoundException{
-        administratorBean.delete(username);
-        return Response.status(Response.Status.OK).build();
+        Principal principal = securityContext.getUserPrincipal();
+        if(securityContext.isUserInRole("Administrator") && !principal.getName().equals(username)) {
+            administratorBean.delete(username);
+            return Response.status(Response.Status.OK).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot delete yourself").build();
     }
 }

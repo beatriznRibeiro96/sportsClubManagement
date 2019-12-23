@@ -3,6 +3,7 @@ package ws;
 import dtos.PartnerDTO;
 import ejbs.PartnerBean;
 import entities.Partner;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
@@ -39,11 +40,7 @@ public class PartnerController {
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/partners/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOs(partnerBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_PARTNERS", e);
-        }
+        return Response.status(200).entity(toDTOs(partnerBean.all())).build();
     }
 
     @GET
@@ -70,7 +67,7 @@ public class PartnerController {
 
     @POST
     @Path("/")
-    public Response createNewPartner (PartnerDTO partnerDTO) throws MyEntityExistsException {
+    public Response createNewPartner (PartnerDTO partnerDTO) throws MyEntityExistsException, MyConstraintViolationException {
         Partner partner = partnerBean.create(partnerDTO.getUsername(),
                 partnerDTO.getPassword(),
                 partnerDTO.getName(),

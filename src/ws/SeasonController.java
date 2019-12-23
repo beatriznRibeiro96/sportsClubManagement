@@ -3,6 +3,7 @@ package ws;
 import dtos.SeasonDTO;
 import ejbs.SeasonBean;
 import entities.Season;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
@@ -37,11 +38,7 @@ public class SeasonController {
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/seasons/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOs(seasonBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_SEASONS", e);
-        }
+        return Response.status(200).entity(toDTOs(seasonBean.all())).build();
     }
 
     @GET
@@ -68,7 +65,7 @@ public class SeasonController {
 
     @POST
     @Path("/")
-    public Response createNewSeason (SeasonDTO seasonDTO) throws MyEntityExistsException {
+    public Response createNewSeason (SeasonDTO seasonDTO) throws MyEntityExistsException, MyConstraintViolationException {
         Season season = seasonBean.create(seasonDTO.getName());
         return Response.status(Response.Status.CREATED).entity(toDTO(season)).build();
     }

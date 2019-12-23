@@ -3,6 +3,7 @@ package ws;
 import dtos.RankDTO;
 import ejbs.RankBean;
 import entities.Rank;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
@@ -41,11 +42,7 @@ public class RankController {
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/ranks/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOs(rankBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_RANKS", e);
-        }
+        return Response.status(200).entity(toDTOs(rankBean.all())).build();
     }
 
     @GET
@@ -72,7 +69,7 @@ public class RankController {
 
     @POST
     @Path("/")
-    public Response createNewRank (RankDTO rankDTO) throws MyEntityExistsException, MyEntityNotFoundException {
+    public Response createNewRank (RankDTO rankDTO) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
         Rank rank = rankBean.create(rankDTO.getName(),
                 rankDTO.getIdadeMin(),
                 rankDTO.getIdadeMax(),

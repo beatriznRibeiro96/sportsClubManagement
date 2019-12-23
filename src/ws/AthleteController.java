@@ -4,6 +4,7 @@ import dtos.AthleteDTO;
 import dtos.SportSubscriptionDTO;
 import ejbs.AthleteBean;
 import entities.Athlete;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
@@ -60,11 +61,7 @@ public class AthleteController {
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/athletes/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOsNoSports(athleteBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_ATHLETES", e);
-        }
+        return Response.status(200).entity(toDTOsNoSports(athleteBean.all())).build();
     }
     @GET
     @Path("{username}")
@@ -90,7 +87,7 @@ public class AthleteController {
 
     @POST
     @Path("/")
-    public Response createNewAthlete (AthleteDTO athleteDTO) throws MyEntityExistsException {
+    public Response createNewAthlete (AthleteDTO athleteDTO) throws MyEntityExistsException, MyConstraintViolationException {
         Athlete athlete = athleteBean.create(athleteDTO.getUsername(),
                 athleteDTO.getPassword(),
                 athleteDTO.getName(),

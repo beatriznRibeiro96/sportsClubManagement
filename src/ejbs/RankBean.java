@@ -2,8 +2,10 @@ package ejbs;
 
 import entities.ActiveSport;
 import entities.Rank;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
+import exceptions.Utils;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -11,6 +13,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 @Stateless(name = "RankEJB")
@@ -21,20 +24,24 @@ public class RankBean {
     @EJB
     private ActiveSportBean activeSportBean;
 
-    public Rank create (String name, int idadeMin, int idadeMax, int activeSportCode) throws MyEntityExistsException, MyEntityNotFoundException {
-        ActiveSport activeSport = activeSportBean.find(activeSportCode);
-        if(activeSport == null){
-            throw new MyEntityNotFoundException("Active Sport not found");
-        }
-        Long count = (Long) em.createNamedQuery("countRanksByNameAndActiveSport").setParameter("name", name).setParameter("activeSport", activeSport).getSingleResult();
-        if(count != 0){
-            throw new MyEntityExistsException("Rank " + name + " already exists in " + activeSport.getName());
-        }
+    public Rank create (String name, int idadeMin, int idadeMax, int activeSportCode) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
         try {
+            ActiveSport activeSport = activeSportBean.find(activeSportCode);
+            if(activeSport == null){
+                throw new MyEntityNotFoundException("Active Sport not found.");
+            }
+            Long count = (Long) em.createNamedQuery("countRanksByNameAndActiveSport").setParameter("name", name).setParameter("activeSport", activeSport).getSingleResult();
+            if(count != 0){
+                throw new MyEntityExistsException("'" + name + "' already exists in '" + activeSport.getName() + "'");
+            }
             Rank rank = new Rank(name, idadeMin, idadeMax, activeSport);
-            activeSport.addRank(rank);
             em.persist(rank);
+            activeSport.addRank(rank);
             return rank;
+        } catch (MyEntityExistsException | MyEntityNotFoundException e) {
+            throw e;
+        } catch(ConstraintViolationException e){
+            throw new MyConstraintViolationException(Utils.getConstraintViolationMessages(e));
         } catch(Exception e){
             throw new EJBException("ERROR_CREATING_RANK", e);
         }
@@ -57,21 +64,20 @@ public class RankBean {
     }
 
     public Rank update(int code, String name, int idadeMin, int idadeMax, int activeSportCode) throws MyEntityNotFoundException, MyEntityExistsException {
-        Rank rank = find(code);
-        if(rank == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_RANK");
-        }
-
-        ActiveSport activeSport = activeSportBean.find(activeSportCode);
-        if(activeSport == null){
-            throw new MyEntityNotFoundException("Active Sport not found");
-        }
-        Long count = (Long) em.createNamedQuery("countRanksByNameAndActiveSport").setParameter("name", name).setParameter("activeSport", activeSport).getSingleResult();
-        if(count != 0 && (!name.equals(rank.getName()) || activeSportCode != rank.getActiveSport().getCode())){
-            throw new MyEntityExistsException(activeSport.getName() + " already has " + name);
-        }
         try{
-            em.lock(activeSport, LockModeType.OPTIMISTIC);
+            Rank rank = find(code);
+            em.lock(rank, LockModeType.OPTIMISTIC);
+            if(rank == null){
+                throw new MyEntityNotFoundException("Rank with code '" + code + "' not found.");
+            }
+            ActiveSport activeSport = activeSportBean.find(activeSportCode);
+            if(activeSport == null){
+                throw new MyEntityNotFoundException("Active Sport not found.");
+            }
+            Long count = (Long) em.createNamedQuery("countRanksByNameAndActiveSport").setParameter("name", name).setParameter("activeSport", activeSport).getSingleResult();
+            if(count != 0 && (!name.equals(rank.getName()) || activeSportCode != rank.getActiveSport().getCode())){
+                throw new MyEntityExistsException("'" + name + "' already exists in '" + activeSport.getName() + "'");
+            }
             rank.setName(name);
             rank.setIdadeMin(idadeMin);
             rank.setIdadeMax(idadeMax);
@@ -82,21 +88,24 @@ public class RankBean {
             }
             em.merge(rank);
             return rank;
-        }catch (Exception e){
+        } catch (MyEntityExistsException | MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
             throw new EJBException("ERROR_UPDATING_RANK", e);
         }
     }
 
     public void delete(int code) throws MyEntityNotFoundException {
-        Rank rank = find(code);
-        if(rank == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_RANK");
-        }
         try{
-            em.lock(rank, LockModeType.OPTIMISTIC);
+            Rank rank = find(code);
+            if(rank == null){
+                throw new MyEntityNotFoundException("Rank with code '" + code + "' not found.");
+            }
             rank.getActiveSport().removeRank(rank);
             em.remove(rank);
-        }catch (Exception e){
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
             throw new EJBException("ERROR_DELETING_RANK", e);
         }
     }
