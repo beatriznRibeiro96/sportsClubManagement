@@ -2,6 +2,7 @@ package ejbs;
 
 import entities.ActiveSport;
 import entities.Athlete;
+import entities.Rank;
 import entities.SportSubscription;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
@@ -23,25 +24,25 @@ public class SportSubscriptionBean {
     private EntityManager em;
 
     @EJB
-    private ActiveSportBean activeSportBean;
+    private RankBean rankBean;
     @EJB
     private AthleteBean athleteBean;
 
-    public SportSubscription create (String name, int activeSportCode, String athleteUsername) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
+    public SportSubscription create (String name, int rankCode, String athleteUsername) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
         try {
-            ActiveSport activeSport = activeSportBean.find(activeSportCode);
-            if(activeSport == null){
-                throw new MyEntityNotFoundException("Active Sport not found.");
+            Rank rank = rankBean.find(rankCode);
+            if(rank == null){
+                throw new MyEntityNotFoundException("Rank not found.");
             }
             Athlete athlete = athleteBean.find(athleteUsername);
             if(athlete == null){
                 throw new MyEntityNotFoundException("Athlete not found.");
             }
-            Long count = (Long) em.createNamedQuery("countSportSubscriptionByActiveSportAndAthlete").setParameter("activeSport", activeSport).setParameter("athlete", athlete).getSingleResult();
+            Long count = (Long) em.createNamedQuery("countSportSubscriptionByRankAndAthlete").setParameter("rank", rank).setParameter("athlete", athlete).getSingleResult();
             if(count != 0){
-                throw new MyEntityExistsException(athlete.getName() + " has already signed up for " + activeSport.getSport().getName() + " in the " + activeSport.getSeason().getName() +  " season");
+                throw new MyEntityExistsException(athlete.getName() + " has already signed up for " + rank.getActiveSport().getSport().getName() + " in the " + rank.getActiveSport().getSeason().getName() +  " season");
             }
-            SportSubscription sportSubscription = new SportSubscription(name, activeSport, athlete);
+            SportSubscription sportSubscription = new SportSubscription(name, rank, athlete);
             em.persist(sportSubscription);
             athlete.addSportSubscription(sportSubscription);
             return sportSubscription;
@@ -70,31 +71,31 @@ public class SportSubscriptionBean {
         }
     }
 
-    public SportSubscription update(int code, String name, int activeSportCode, String athleteUsername) throws MyEntityNotFoundException, MyEntityExistsException {
+    public SportSubscription update(int code, String name, int rankCode, String athleteUsername) throws MyEntityNotFoundException, MyEntityExistsException {
         try{
             SportSubscription sportSubscription = find(code);
             em.lock(sportSubscription, LockModeType.OPTIMISTIC);
             if(sportSubscription == null){
                 throw new MyEntityNotFoundException("Sport Subscription with code '" + code + "' not found.");
             }
-            ActiveSport activeSport = activeSportBean.find(activeSportCode);
-            if(activeSport == null){
-                throw new MyEntityNotFoundException("Active Sport not found.");
+            Rank rank = rankBean.find(rankCode);
+            if(rank == null){
+                throw new MyEntityNotFoundException("Rank not found.");
             }
             Athlete athlete = athleteBean.find(athleteUsername);
             if(athlete == null){
                 throw new MyEntityNotFoundException("Athlete not found.");
             }
-            Long count = (Long) em.createNamedQuery("countSportSubscriptionByActiveSportAndAthlete").setParameter("activeSport", activeSport).setParameter("athlete", athlete).getSingleResult();
-            if(count != 0 && (activeSportCode != sportSubscription.getActiveSport().getCode() || !athleteUsername.equals(sportSubscription.getAthlete().getUsername()))){
-                throw new MyEntityExistsException(athleteUsername + " has already signed up for " + activeSport.getSport().getName() + " in the " + activeSport.getSeason().getName() +  " season");
+            Long count = (Long) em.createNamedQuery("countSportSubscriptionByRankAndAthlete").setParameter("rank", rank).setParameter("athlete", athlete).getSingleResult();
+            if(count != 0 && (rankCode != sportSubscription.getRank().getCode() || !athleteUsername.equals(sportSubscription.getAthlete().getUsername()))){
+                throw new MyEntityExistsException(athleteUsername + " has already signed up for " + rank.getActiveSport().getSport().getName() + " in the " + rank.getActiveSport().getSeason().getName() +  " season");
             }
             if(!athlete.getSportSubscriptions().contains(sportSubscription)){
                 sportSubscription.getAthlete().removeSportSubscription(sportSubscription);
                 athlete.addSportSubscription(sportSubscription);
                 sportSubscription.setAthlete(athlete);
             }
-            sportSubscription.setActiveSport(activeSport);
+            sportSubscription.setRank(rank);
             sportSubscription.setName(name);
             em.merge(sportSubscription);
             return sportSubscription;

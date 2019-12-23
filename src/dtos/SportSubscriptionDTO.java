@@ -5,19 +5,19 @@ import java.io.Serializable;
 public class SportSubscriptionDTO implements Serializable {
     private int code;
     private String name;
-    private int activeSportCode;
-    private String activeSportName;
+    private int rankCode;
+    private String rankName;
     private String athleteUsername;
     private String athleteName;
 
     public SportSubscriptionDTO() {
     }
 
-    public SportSubscriptionDTO(int code, String name, int activeSportCode, String activeSportName, String athleteUsername, String athleteName) {
+    public SportSubscriptionDTO(int code, String name, int rankCode, String rankName, String athleteUsername, String athleteName) {
         this.code = code;
         this.name = name;
-        this.activeSportCode = activeSportCode;
-        this.activeSportName = activeSportName;
+        this.rankCode = rankCode;
+        this.rankName = rankName;
         this.athleteUsername = athleteUsername;
         this.athleteName = athleteName;
     }
@@ -38,20 +38,20 @@ public class SportSubscriptionDTO implements Serializable {
         this.name = name;
     }
 
-    public int getActiveSportCode() {
-        return activeSportCode;
+    public int getRankCode() {
+        return rankCode;
     }
 
-    public void setActiveSportCode(int activeSportCode) {
-        this.activeSportCode = activeSportCode;
+    public void setRankCode(int rankCode) {
+        this.rankCode = rankCode;
     }
 
-    public String getActiveSportName() {
-        return activeSportName;
+    public String getRankName() {
+        return rankName;
     }
 
-    public void setActiveSportName(String activeSportName) {
-        this.activeSportName = activeSportName;
+    public void setRankName(String rankName) {
+        this.rankName = rankName;
     }
 
     public String getAthleteUsername() {

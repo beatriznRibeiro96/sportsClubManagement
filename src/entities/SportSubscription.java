@@ -7,15 +7,15 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
-@Table(name="SPORT_SUBSCRIPTIONS", uniqueConstraints = @UniqueConstraint(columnNames = {"ACTIVESPORT_CODE", "ATHLETE_USERNAME"}))
+@Table(name="SPORT_SUBSCRIPTIONS", uniqueConstraints = @UniqueConstraint(columnNames = {"RANK_CODE", "ATHLETE_USERNAME"}))
 @NamedQueries({
         @NamedQuery(
                 name = "getAllSportSubscriptions",
                 query = "SELECT ss FROM SportSubscription ss ORDER BY ss.code"
         ),
         @NamedQuery(
-                name = "countSportSubscriptionByActiveSportAndAthlete",
-                query = "SELECT count(ss) FROM SportSubscription ss WHERE ss.activeSport = :activeSport AND ss.athlete = :athlete"
+                name = "countSportSubscriptionByRankAndAthlete",
+                query = "SELECT count(ss) FROM SportSubscription ss WHERE ss.rank = :rank AND ss.athlete = :athlete"
         )
 })
 public class SportSubscription implements Serializable {
@@ -25,10 +25,10 @@ public class SportSubscription implements Serializable {
     @NotBlank(message = "name is mandatory")
     @Column(nullable = false)
     private String name;
-    @NotNull(message = "active sport is mandatory")
+    @NotNull(message = "rank is mandatory")
     @JoinColumn(nullable = false)
     @ManyToOne
-    private ActiveSport activeSport;
+    private Rank rank;
     @NotNull(message = "athlete is mandatory")
     @JoinColumn(nullable = false)
     @ManyToOne
@@ -39,9 +39,9 @@ public class SportSubscription implements Serializable {
     public SportSubscription() {
     }
 
-    public SportSubscription(String name, ActiveSport activeSport, Athlete athlete) {
+    public SportSubscription(String name, Rank rank, Athlete athlete) {
         this.name = name;
-        this.activeSport = activeSport;
+        this.rank = rank;
         this.athlete = athlete;
     }
 
@@ -61,12 +61,12 @@ public class SportSubscription implements Serializable {
         this.name = name;
     }
 
-    public ActiveSport getActiveSport() {
-        return activeSport;
+    public Rank getRank() {
+        return rank;
     }
 
-    public void setActiveSport(ActiveSport activeSport) {
-        this.activeSport = activeSport;
+    public void setRank(Rank rank) {
+        this.rank = rank;
     }
 
     public Athlete getAthlete() {
