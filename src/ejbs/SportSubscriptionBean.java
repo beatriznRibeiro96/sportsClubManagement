@@ -40,7 +40,7 @@ public class SportSubscriptionBean {
             }
             Long count = (Long) em.createNamedQuery("countSportSubscriptionByRankAndAthlete").setParameter("rank", rank).setParameter("athlete", athlete).getSingleResult();
             if(count != 0){
-                throw new MyEntityExistsException(athlete.getName() + " has already signed up for " + rank.getActiveSport().getSport().getName() + " in the " + rank.getActiveSport().getSeason().getName() +  " season");
+                throw new MyEntityExistsException(athlete.getName() + " has already signed up for " + rank.getName() + " in the " + rank.getActiveSport().getSeason().getName() +  " season");
             }
             SportSubscription sportSubscription = new SportSubscription(name, rank, athlete);
             em.persist(sportSubscription);
@@ -88,7 +88,7 @@ public class SportSubscriptionBean {
             }
             Long count = (Long) em.createNamedQuery("countSportSubscriptionByRankAndAthlete").setParameter("rank", rank).setParameter("athlete", athlete).getSingleResult();
             if(count != 0 && (rankCode != sportSubscription.getRank().getCode() || !athleteUsername.equals(sportSubscription.getAthlete().getUsername()))){
-                throw new MyEntityExistsException(athleteUsername + " has already signed up for " + rank.getActiveSport().getSport().getName() + " in the " + rank.getActiveSport().getSeason().getName() +  " season");
+                throw new MyEntityExistsException(athleteUsername + " has already signed up for " + rank.getName() + " in the " + rank.getActiveSport().getSeason().getName() +  " season");
             }
             if(!athlete.getSportSubscriptions().contains(sportSubscription)){
                 sportSubscription.getAthlete().removeSportSubscription(sportSubscription);
