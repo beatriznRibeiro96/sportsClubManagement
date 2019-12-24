@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import java.io.Serializable;
+import java.time.LocalDate;
 
 @Entity
 @NamedQueries({
@@ -16,7 +17,7 @@ public class Partner extends User implements Serializable {
     public Partner() {
     }
 
-    public Partner(String username, String password, String name, String email) {
-        super(username, password, name, email);
+    public Partner(String username, String password, String name, String email, LocalDate birthDate) {
+        super(username, password, name, email, birthDate);
     }
 }

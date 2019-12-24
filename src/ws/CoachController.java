@@ -1,11 +1,14 @@
 package ws;
 
+import dtos.ActiveSportDTO;
 import dtos.CoachDTO;
 import dtos.SportDTO;
 import ejbs.CoachBean;
 import entities.Coach;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
+import exceptions.MyParseDateException;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -13,6 +16,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,36 +38,34 @@ public class CoachController {
                 coach.getUsername(),
                 coach.getPassword(),
                 coach.getName(),
-                coach.getEmail()
+                coach.getEmail(),
+                coach.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
 
-        coachDTO.setSports(SportController.toDTOs(coach.getSports()));
+        coachDTO.setActiveSports(ActiveSportController.toDTOs(coach.getActiveSports()));
         return coachDTO;
     }
 
     // Converts an entity Coach to a DTO Coach class
-    private CoachDTO toDTONoSports(Coach coach){
+    private CoachDTO toDTONoActiveSports(Coach coach){
         return new CoachDTO(
                 coach.getUsername(),
                 coach.getPassword(),
                 coach.getName(),
-                coach.getEmail()
+                coach.getEmail(),
+                coach.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
     }
 
     // converts an entire list of entities into a list of DTOs
-    private List<CoachDTO> toDTOsNoSports(List<Coach> coaches){
-        return coaches.stream().map(this::toDTONoSports).collect(Collectors.toList());
+    private List<CoachDTO> toDTOsNoActiveSports(List<Coach> coaches){
+        return coaches.stream().map(this::toDTONoActiveSports).collect(Collectors.toList());
     }
 
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/coaches/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOsNoSports(coachBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_COACHES", e);
-        }
+        return Response.status(200).entity(toDTOsNoActiveSports(coachBean.all())).build();
     }
 
     @GET
@@ -90,21 +92,23 @@ public class CoachController {
 
     @POST
     @Path("/")
-    public Response createNewCoach (CoachDTO coachDTO) throws MyEntityExistsException {
+    public Response createNewCoach (CoachDTO coachDTO) throws MyEntityExistsException, MyConstraintViolationException, MyParseDateException {
         Coach coach = coachBean.create(coachDTO.getUsername(),
                 coachDTO.getPassword(),
                 coachDTO.getName(),
-                coachDTO.getEmail());
+                coachDTO.getEmail(),
+                coachDTO.getBirthDate());
         return Response.status(Response.Status.CREATED).entity(toDTO(coach)).build();
     }
 
     @PUT
     @Path("{username}")
-    public Response updateCoach(@PathParam("username") String username, CoachDTO coachDTO) throws MyEntityNotFoundException {
+    public Response updateCoach(@PathParam("username") String username, CoachDTO coachDTO) throws MyEntityNotFoundException, MyParseDateException {
         Coach coach = coachBean.update(username,
                 coachDTO.getPassword(),
                 coachDTO.getName(),
-                coachDTO.getEmail());
+                coachDTO.getEmail(),
+                coachDTO.getBirthDate());
         return Response.status(Response.Status.OK).entity(toDTO(coach)).build();
     }
 
@@ -117,13 +121,13 @@ public class CoachController {
 
     @GET
     @Path("{username}/sports")
-    public Response getCoachSports(@PathParam("username") String username) {
+    public Response getCoachActiveSports(@PathParam("username") String username) {
         String msg;
         try {
             Coach coach = coachBean.find(username);
             if (coach != null) {
-                GenericEntity<List<SportDTO>> entity
-                        = new GenericEntity<List<SportDTO>>(SportController.toDTOs(coach.getSports())) {
+                GenericEntity<List<ActiveSportDTO>> entity
+                        = new GenericEntity<List<ActiveSportDTO>>(ActiveSportController.toDTOs(coach.getActiveSports())) {
                 };
                 return Response.status(Response.Status.OK)
                         .entity(entity)
@@ -132,7 +136,7 @@ public class CoachController {
             msg = "ERROR_FINDING_COACH";
             System.err.println(msg);
         } catch (Exception e) {
-            msg = "ERROR_FETCHING_COACH_SPORTS --->" + e.getMessage();
+            msg = "ERROR_FETCHING_COACH_ACTIVE_SPORTS --->" + e.getMessage();
             System.err.println(msg);
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

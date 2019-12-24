@@ -1,14 +1,16 @@
 package ejbs;
 
 import entities.Partner;
-import exceptions.MyEntityExistsException;
-import exceptions.MyEntityNotFoundException;
+import exceptions.*;
 
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
+import javax.validation.ConstraintViolationException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Stateless(name = "PartnerEJB")
@@ -16,14 +18,22 @@ public class PartnerBean {
     @PersistenceContext
     private EntityManager em;
 
-    public Partner create (String username,String password, String name, String email) throws MyEntityExistsException {
-        if (find(username)!=null){
-            throw new MyEntityExistsException("Username '" + username + "' already exists");
-        }
+    public Partner create (String username,String password, String name, String email, String birthDate) throws MyEntityExistsException, MyConstraintViolationException, MyParseDateException {
         try {
-            Partner partner = new Partner(username, password, name, email);
+            if(find(username) != null){
+                throw new MyEntityExistsException("Username: '" + username + "' already exists");
+            }
+            if (birthDate.isEmpty()){
+                throw new MyParseDateException("Birth date cannot be empty");
+            }
+            LocalDate dataNascimento = LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            Partner partner = new Partner(username, password, name, email, dataNascimento);
             em.persist(partner);
             return partner;
+        } catch(MyEntityExistsException | MyParseDateException e){
+            throw e;
+        } catch(ConstraintViolationException e) {
+            throw new MyConstraintViolationException(Utils.getConstraintViolationMessages(e));
         } catch(Exception e){
             throw new EJBException("ERROR_CREATING_PARTNER", e);
         }
@@ -45,32 +55,40 @@ public class PartnerBean {
         }
     }
 
-    public Partner update(String username, String password, String name, String email) throws MyEntityNotFoundException {
-        Partner partner = find(username);
-        if(partner == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_PARTNER");
-        }
+    public Partner update(String username, String password, String name, String email, String birthDate) throws MyEntityNotFoundException, MyParseDateException {
         try{
+            Partner partner = find(username);
             em.lock(partner, LockModeType.OPTIMISTIC);
+            if(partner == null){
+                throw new MyEntityNotFoundException("Username '" + username + "' not found.");
+            }
+            if (birthDate.isEmpty()){
+                throw new MyParseDateException("Birth date cannot be empty");
+            }
+            LocalDate dataNascimento = LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             partner.setName(name);
             partner.setEmail(email);
             partner.setPassword(password);
+            partner.setBirthDate(dataNascimento);
             em.merge(partner);
             return partner;
-        }catch (Exception e){
+        } catch (MyEntityNotFoundException | MyParseDateException e) {
+            throw e;
+        } catch (Exception e){
             throw new EJBException("ERROR_UPDATING_PARTNER", e);
         }
     }
 
     public void delete(String username) throws MyEntityNotFoundException {
-        Partner partner = find(username);
-        if(partner == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_PARTNER");
-        }
         try{
-            em.lock(partner, LockModeType.OPTIMISTIC);
+            Partner partner = find(username);
+            if(partner == null){
+                throw new MyEntityNotFoundException("Username '" + username + "' not found.");
+            }
             em.remove(partner);
-        }catch (Exception e){
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
             throw new EJBException("ERROR_DELETING_PARTNER", e);
         }
     }

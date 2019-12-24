@@ -7,33 +7,31 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
-@Table(name="SPORTS", uniqueConstraints = @UniqueConstraint(columnNames = {"NAME"}))
+@Table(name="SEASONS", uniqueConstraints = @UniqueConstraint(columnNames = {"NAME"}))
 @NamedQueries({
         @NamedQuery(
-                name = "getAllSports",
-                query = "SELECT s FROM Sport s ORDER BY s.name"
+                name = "getAllSeasons",
+                query = "SELECT sea FROM Season sea ORDER BY sea.name"
         ),
         @NamedQuery(
-                name = "countSportByName",
-                query = "SELECT count(s) FROM Sport s WHERE s.name = :name"
+                name = "countSeasonByName",
+                query = "SELECT count(sea) FROM Season sea WHERE sea.name = :name"
         )
 })
-public class Sport implements Serializable {
+public class Season implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
     @NotBlank(message = "name is mandatory")
     @Column(nullable = false)
     private String name;
-
     @Version
     private int version;
 
-    public Sport() {
+    public Season() {
     }
 
-    public Sport(String name) {
-        this();
+    public Season(String name) {
         this.name = name;
     }
 

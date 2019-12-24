@@ -3,14 +3,17 @@ package ws;
 import dtos.PartnerDTO;
 import ejbs.PartnerBean;
 import entities.Partner;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
+import exceptions.MyParseDateException;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +30,8 @@ public class PartnerController {
                 partner.getUsername(),
                 partner.getPassword(),
                 partner.getName(),
-                partner.getEmail()
+                partner.getEmail(),
+                partner.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
     }
 
@@ -39,11 +43,7 @@ public class PartnerController {
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/partners/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOs(partnerBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_PARTNERS", e);
-        }
+        return Response.status(200).entity(toDTOs(partnerBean.all())).build();
     }
 
     @GET
@@ -70,21 +70,23 @@ public class PartnerController {
 
     @POST
     @Path("/")
-    public Response createNewPartner (PartnerDTO partnerDTO) throws MyEntityExistsException {
+    public Response createNewPartner (PartnerDTO partnerDTO) throws MyEntityExistsException, MyConstraintViolationException, MyParseDateException {
         Partner partner = partnerBean.create(partnerDTO.getUsername(),
                 partnerDTO.getPassword(),
                 partnerDTO.getName(),
-                partnerDTO.getEmail());
+                partnerDTO.getEmail(),
+                partnerDTO.getBirthDate());
         return Response.status(Response.Status.CREATED).entity(toDTO(partner)).build();
     }
 
     @PUT
     @Path("{username}")
-    public Response updatePartner(@PathParam("username") String username, PartnerDTO partnerDTO) throws MyEntityNotFoundException {
+    public Response updatePartner(@PathParam("username") String username, PartnerDTO partnerDTO) throws MyEntityNotFoundException, MyParseDateException {
         Partner partner = partnerBean.update(username,
                 partnerDTO.getPassword(),
                 partnerDTO.getName(),
-                partnerDTO.getEmail());
+                partnerDTO.getEmail(),
+                partnerDTO.getBirthDate());
         return Response.status(Response.Status.OK).entity(toDTO(partner)).build();
     }
 

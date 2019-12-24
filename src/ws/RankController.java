@@ -3,6 +3,7 @@ package ws;
 import dtos.RankDTO;
 import ejbs.RankBean;
 import entities.Rank;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
 
@@ -26,7 +27,10 @@ public class RankController {
         return new RankDTO(
                 rank.getCode(),
                 rank.getName(),
-                SportController.toDTO(rank.getSport())
+                rank.getIdadeMin(),
+                rank.getIdadeMax(),
+                rank.getActiveSport().getCode(),
+                rank.getActiveSport().getName()
         );
     }
 
@@ -38,11 +42,7 @@ public class RankController {
     @GET // means: to call this endpoint, we need to use the verb get
     @Path("/") // means: the relative url path is “/api/ranks/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOs(rankBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_RANKS", e);
-        }
+        return Response.status(200).entity(toDTOs(rankBean.all())).build();
     }
 
     @GET
@@ -69,19 +69,22 @@ public class RankController {
 
     @POST
     @Path("/")
-    public Response createNewRank (RankDTO rankDTO) throws MyEntityExistsException, MyEntityNotFoundException {
-        Rank rank = rankBean.create(rankDTO.getCode(),
-                rankDTO.getName(),
-                rankDTO.getSport().getCode());
+    public Response createNewRank (RankDTO rankDTO) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
+        Rank rank = rankBean.create(rankDTO.getName(),
+                rankDTO.getIdadeMin(),
+                rankDTO.getIdadeMax(),
+                rankDTO.getActiveSportCode());
         return Response.status(Response.Status.CREATED).entity(toDTO(rank)).build();
     }
 
     @PUT
     @Path("{code}")
-    public Response updateRank(@PathParam("code") int code, RankDTO rankDTO) throws MyEntityNotFoundException {
+    public Response updateRank(@PathParam("code") int code, RankDTO rankDTO) throws MyEntityNotFoundException, MyEntityExistsException {
         Rank rank = rankBean.update(code,
                 rankDTO.getName(),
-                rankDTO.getSport().getCode());
+                rankDTO.getIdadeMin(),
+                rankDTO.getIdadeMax(),
+                rankDTO.getActiveSportCode());
         return Response.status(Response.Status.OK).entity(toDTO(rank)).build();
     }
 

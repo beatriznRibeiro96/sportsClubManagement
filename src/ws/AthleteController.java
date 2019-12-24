@@ -1,11 +1,13 @@
 package ws;
 
 import dtos.AthleteDTO;
-import dtos.SportDTO;
+import dtos.SportSubscriptionDTO;
 import ejbs.AthleteBean;
 import entities.Athlete;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
+import exceptions.MyParseDateException;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -13,7 +15,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Collection;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,10 +37,11 @@ public class AthleteController {
                 athlete.getUsername(),
                 athlete.getPassword(),
                 athlete.getName(),
-                athlete.getEmail()
+                athlete.getEmail(),
+                athlete.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
 
-        athleteDTO.setSports(SportController.toDTOs(athlete.getSports()));
+        athleteDTO.setSportSubscriptions(SportSubscriptionController.toDTOs(athlete.getSportSubscriptions()));
         return athleteDTO;
     }
 
@@ -48,7 +51,8 @@ public class AthleteController {
                 athlete.getUsername(),
                 athlete.getPassword(),
                 athlete.getName(),
-                athlete.getEmail()
+                athlete.getEmail(),
+                athlete.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
     }
 
@@ -59,13 +63,9 @@ public class AthleteController {
 
 
     @GET // means: to call this endpoint, we need to use the verb get
-    @Path("/") // means: the relative url path is “/api/administrators// /”
+    @Path("/") // means: the relative url path is “/api/athletes/”
     public Response all() {
-        try {
-            return Response.status(200).entity(toDTOsNoSports(athleteBean.all())).build();
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_ATHLETES", e);
-        }
+        return Response.status(200).entity(toDTOsNoSports(athleteBean.all())).build();
     }
     @GET
     @Path("{username}")
@@ -91,21 +91,23 @@ public class AthleteController {
 
     @POST
     @Path("/")
-    public Response createNewAthlete (AthleteDTO athleteDTO) throws MyEntityExistsException {
+    public Response createNewAthlete (AthleteDTO athleteDTO) throws MyEntityExistsException, MyConstraintViolationException, MyParseDateException {
         Athlete athlete = athleteBean.create(athleteDTO.getUsername(),
                 athleteDTO.getPassword(),
                 athleteDTO.getName(),
-                athleteDTO.getEmail());
+                athleteDTO.getEmail(),
+                athleteDTO.getBirthDate());
         return Response.status(Response.Status.OK).entity(toDTO(athlete)).build();
     }
 
     @PUT
     @Path("{username}")
-    public Response updateAthlete(@PathParam("username") String username, AthleteDTO athleteDTO) throws MyEntityNotFoundException{
+    public Response updateAthlete(@PathParam("username") String username, AthleteDTO athleteDTO) throws MyEntityNotFoundException, MyParseDateException {
         Athlete athlete = athleteBean.update(username,
                 athleteDTO.getPassword(),
                 athleteDTO.getName(),
-                athleteDTO.getEmail());
+                athleteDTO.getEmail(),
+                athleteDTO.getBirthDate());
         return Response.status(Response.Status.OK).entity(toDTO(athlete)).build();
     }
 
@@ -117,14 +119,14 @@ public class AthleteController {
     }
 
     @GET
-    @Path("{username}/sports")
-    public Response getAthleteSports(@PathParam("username") String username) {
+    @Path("{username}/sportSubscriptions")
+    public Response getAthleteSportSubscriptions(@PathParam("username") String username) {
         String msg;
         try {
             Athlete athlete = athleteBean.find(username);
             if (athlete != null) {
-                GenericEntity<List<SportDTO>> entity
-                        = new GenericEntity<List<SportDTO>>(SportController.toDTOs(athlete.getSports())) {
+                GenericEntity<List<SportSubscriptionDTO>> entity
+                        = new GenericEntity<List<SportSubscriptionDTO>>(SportSubscriptionController.toDTOs(athlete.getSportSubscriptions())) {
                 };
                 return Response.status(Response.Status.OK)
                         .entity(entity)
@@ -133,7 +135,7 @@ public class AthleteController {
             msg = "ERROR_FINDING_ATHLETE";
             System.err.println(msg);
         } catch (Exception e) {
-            msg = "ERROR_FETCHING_ATHLETE_SPORTS --->" + e.getMessage();
+            msg = "ERROR_FETCHING_ATHLETE_SPORT_SUBSCRIPTIONS --->" + e.getMessage();
             System.err.println(msg);
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

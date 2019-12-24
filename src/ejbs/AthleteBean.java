@@ -1,9 +1,7 @@
 package ejbs;
 
 import entities.Athlete;
-import entities.Sport;
-import exceptions.MyEntityExistsException;
-import exceptions.MyEntityNotFoundException;
+import exceptions.*;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -11,6 +9,9 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
+import javax.validation.ConstraintViolationException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Stateless (name = "AthleteEJB")
@@ -18,17 +19,22 @@ public class AthleteBean {
     @PersistenceContext
     private EntityManager em;
 
-    @EJB
-    private SportBean sportBean;
-
-    public Athlete create(String username, String password, String name, String email) throws MyEntityExistsException {
-        if(find(username) != null){
-            throw new MyEntityExistsException("Username '" + username + "' already taken");
-        }
+    public Athlete create(String username, String password, String name, String email, String birthDate) throws MyEntityExistsException, MyConstraintViolationException, MyParseDateException {
         try{
-            Athlete athlete = new Athlete(username, password, name, email);
+            if(find(username) != null){
+                throw new MyEntityExistsException("Username '" + username + "' already exists");
+            }
+            if (birthDate.isEmpty()){
+                throw new MyParseDateException("Birth date cannot be empty");
+            }
+            LocalDate dataNascimento = LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            Athlete athlete = new Athlete(username, password, name, email, dataNascimento);
             em.persist(athlete);
             return athlete;
+        } catch(MyEntityExistsException | MyParseDateException e){
+            throw e;
+        } catch(ConstraintViolationException e) {
+            throw new MyConstraintViolationException(Utils.getConstraintViolationMessages(e));
         } catch(Exception e){
             throw new EJBException("ERROR_CREATING_ATHLETE", e);
         }
@@ -49,55 +55,41 @@ public class AthleteBean {
         }
     }
 
-    public Athlete update(String username, String password, String name, String email) throws MyEntityNotFoundException {
-        Athlete athlete = find(username);
-        if(athlete == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_ATHELETE");
-        }
+    public Athlete update(String username, String password, String name, String email, String birthDate) throws MyEntityNotFoundException, MyParseDateException {
         try {
+            Athlete athlete = find(username);
             em.lock(athlete, LockModeType.OPTIMISTIC);
+            if(athlete == null){
+                throw new MyEntityNotFoundException("Username '" + username + "' not found.");
+            }
+            if (birthDate.isEmpty()){
+                throw new MyParseDateException("Birth date cannot be empty");
+            }
+            LocalDate dataNascimento = LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             athlete.setPassword(password);
             athlete.setName(name);
             athlete.setEmail(email);
+            athlete.setBirthDate(dataNascimento);
             em.merge(athlete);
             return athlete;
+        } catch (MyEntityNotFoundException | MyParseDateException e) {
+            throw e;
         } catch (Exception e) {
             throw new EJBException("ERROR_UPDATING_ATHELETE", e);
         }
     }
 
     public void delete(String username) throws MyEntityNotFoundException {
-        Athlete athlete = find(username);
-        if(athlete == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_ATHELETE");
-        }
         try {
-            em.lock(athlete, LockModeType.OPTIMISTIC);
+            Athlete athlete = find(username);
+            if(athlete == null){
+                throw new MyEntityNotFoundException("Username '" + username + "' not found.");
+            }
             em.remove(athlete);
-        }catch (Exception e){
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
             e.getMessage();
-        }
-    }
-
-    public void associateAthleteToSport(String athleteUsername, int sportCode){
-        try{
-            Athlete athlete = find(athleteUsername);
-            Sport sport = sportBean.find(sportCode);
-            athlete.addSport(sport);
-            sport.addAthlete(athlete);
-        } catch (Exception e){
-            throw new EJBException("ERROR_ASSOCIATE_ATHLETE_TO_SPORT", e);
-        }
-    }
-
-    public void dissociateAthleteFromSport(String athleteUsername, int sportCode){
-        try{
-            Athlete athlete = find(athleteUsername);
-            Sport sport = sportBean.find(sportCode);
-            athlete.removeSport(sport);
-            sport.removeAthlete(athlete);
-        } catch (Exception e){
-            throw new EJBException("ERROR_DISSOCIATE_ATHLETE_FROM_SPORT", e);
         }
     }
 }

@@ -5,15 +5,21 @@ import java.io.Serializable;
 public class RankDTO implements Serializable {
     private int code;
     private String name;
-    private SportDTO sport;
+    private int idadeMin;
+    private int idadeMax;
+    private int activeSportCode;
+    private String activeSportName;
 
     public RankDTO() {
     }
 
-    public RankDTO(int code, String name, SportDTO sport) {
+    public RankDTO(int code, String name, int idadeMin, int idadeMax, int activeSportCode, String activeSportName) {
         this.code = code;
         this.name = name;
-        this.sport = sport;
+        this.idadeMin = idadeMin;
+        this.idadeMax = idadeMax;
+        this.activeSportCode = activeSportCode;
+        this.activeSportName = activeSportName;
     }
 
     public int getCode() {
@@ -32,11 +38,35 @@ public class RankDTO implements Serializable {
         this.name = name;
     }
 
-    public SportDTO getSport() {
-        return sport;
+    public int getIdadeMin() {
+        return idadeMin;
     }
 
-    public void setSport(SportDTO sport) {
-        this.sport = sport;
+    public void setIdadeMin(int idadeMin) {
+        this.idadeMin = idadeMin;
+    }
+
+    public int getIdadeMax() {
+        return idadeMax;
+    }
+
+    public void setIdadeMax(int idadeMax) {
+        this.idadeMax = idadeMax;
+    }
+
+    public int getActiveSportCode() {
+        return activeSportCode;
+    }
+
+    public void setActiveSportCode(int activeSportCode) {
+        this.activeSportCode = activeSportCode;
+    }
+
+    public String getActiveSportName() {
+        return activeSportName;
+    }
+
+    public void setActiveSportName(String activeSportName) {
+        this.activeSportName = activeSportName;
     }
 }
