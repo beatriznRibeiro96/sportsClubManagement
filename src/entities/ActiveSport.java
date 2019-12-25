@@ -45,12 +45,17 @@ public class ActiveSport implements Serializable {
 
     @OneToMany(mappedBy = "activeSport", cascade = CascadeType.REMOVE)
     private Set<Rank> ranks;
+
+    @OneToMany(mappedBy = "activeSport", cascade = CascadeType.REMOVE)
+    private Set<Grade> grades;
+
     @Version
     private int version;
 
     public ActiveSport() {
         this.coaches = new LinkedHashSet<>();
         this.ranks = new LinkedHashSet<>();
+        this.grades = new LinkedHashSet<>();
     }
 
     public ActiveSport(String name, Sport sport, Season season) {
@@ -59,6 +64,7 @@ public class ActiveSport implements Serializable {
         this.season = season;
         this.coaches = new LinkedHashSet<>();
         this.ranks = new LinkedHashSet<>();
+        this.grades = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -109,6 +115,14 @@ public class ActiveSport implements Serializable {
         this.ranks = ranks;
     }
 
+    public Set<Grade> getGrades() {
+        return grades;
+    }
+
+    public void setGrades(Set<Grade> grades) {
+        this.grades = grades;
+    }
+
     public void addCoach(Coach coach) {
         coaches.add(coach);
     }
@@ -120,4 +134,8 @@ public class ActiveSport implements Serializable {
     public void addRank(Rank rank) { ranks.add(rank); }
 
     public void removeRank(Rank rank) { ranks.remove(rank); }
+
+    public void addGrade(Grade grade) { grades.add(grade); }
+
+    public void removeGrade(Grade grade) { grades.remove(grade); }
 }

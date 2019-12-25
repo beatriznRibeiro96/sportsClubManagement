@@ -62,6 +62,9 @@ public class ConfigBean {
     @EJB
     private RankBean rankBean;
 
+    @EJB
+    private GradeBean gradeBean;
+
     @PostConstruct
     public void PopulateDB(){
         try {
@@ -111,12 +114,18 @@ public class ConfigBean {
             Rank rank1 = rankBean.create("Juniores", 16, 19, activeSport.getCode());
             Rank rank2 = rankBean.create("Seniores", 16, 35, activeSport.getCode());
             Rank rank3 = rankBean.create("Seniores", 18, 40, activeSport2.getCode());
-            SportSubscription sportSubscription = sportSubscriptionBean.create("Fut18/19-Rui", rank3.getCode(), athlete.getUsername());
-            SportSubscription sportSubscription2 = sportSubscriptionBean.create("And18/19-Rui", rank2.getCode(), athlete.getUsername());
-            SportSubscription sportSubscription3 = sportSubscriptionBean.create("And18/19-Luís", rank1.getCode(), athlete2.getUsername());
+            SportSubscription sportSubscription = sportSubscriptionBean.create("Seniores-And18/19-Rui", rank3.getCode(), athlete.getUsername());
+            SportSubscription sportSubscription2 = sportSubscriptionBean.create("Seniores-Fut18/19-Rui", rank2.getCode(), athlete.getUsername());
+            SportSubscription sportSubscription3 = sportSubscriptionBean.create("Juniores-Fut18/19-Luís", rank1.getCode(), athlete2.getUsername());
+            Grade grade = gradeBean.create("Formação Completa", activeSport.getCode());
+            Grade grade2 = gradeBean.create("Atleta com distinção", activeSport.getCode());
+            Grade grade3 = gradeBean.create("Goleador 18/19", activeSport2.getCode());
             activeSportBean.associateCoach(activeSport.getCode(), coach.getUsername());
             activeSportBean.associateCoach(activeSport2.getCode(), coach.getUsername());
             activeSportBean.associateCoach(activeSport.getCode(), coach2.getUsername());
+            gradeBean.addAthlete(grade.getCode(), athlete.getUsername());
+            gradeBean.addAthlete(grade3.getCode(), athlete.getUsername());
+            gradeBean.addAthlete(grade2.getCode(), athlete2.getUsername());
             //endregion
         } catch (Exception e) {
             logger.warning("ERROR: " + e.getMessage());
