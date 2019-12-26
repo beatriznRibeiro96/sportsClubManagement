@@ -1,6 +1,7 @@
 package ws;
 
 import dtos.AthleteDTO;
+import dtos.GradeDTO;
 import dtos.SportSubscriptionDTO;
 import ejbs.AthleteBean;
 import entities.Athlete;
@@ -42,6 +43,7 @@ public class AthleteController {
         );
 
         athleteDTO.setSportSubscriptions(SportSubscriptionController.toDTOs(athlete.getSportSubscriptions()));
+        athleteDTO.setGrades(GradeController.toDTOs(athlete.getGrades()));
         return athleteDTO;
     }
 
@@ -136,6 +138,31 @@ public class AthleteController {
             System.err.println(msg);
         } catch (Exception e) {
             msg = "ERROR_FETCHING_ATHLETE_SPORT_SUBSCRIPTIONS --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
+
+    @GET
+    @Path("{username}/grades")
+    public Response getAthleteGrades(@PathParam("username") String username) {
+        String msg;
+        try {
+            Athlete athlete = athleteBean.find(username);
+            if (athlete != null) {
+                GenericEntity<List<GradeDTO>> entity
+                        = new GenericEntity<List<GradeDTO>>(GradeController.toDTOs(athlete.getGrades())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_ATHLETE";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_ATHLETE_GRADES --->" + e.getMessage();
             System.err.println(msg);
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
