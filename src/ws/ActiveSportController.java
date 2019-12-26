@@ -1,9 +1,6 @@
 package ws;
 
-import dtos.ActiveSportDTO;
-import dtos.CoachDTO;
-import dtos.GradeDTO;
-import dtos.RankDTO;
+import dtos.*;
 import ejbs.ActiveSportBean;
 import entities.ActiveSport;
 import exceptions.MyConstraintViolationException;
@@ -165,6 +162,31 @@ public class ActiveSportController {
             System.err.println(msg);
         } catch (Exception e) {
             msg = "ERROR_FETCHING_ACTIVE_SPORT_GRADES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
+
+    @GET
+    @Path("{code}/schedules")
+    public Response getActiveSportSchedules(@PathParam("code") int code) {
+        String msg;
+        try {
+            ActiveSport activeSport = activeSportBean.find(code);
+            if (activeSport != null) {
+                GenericEntity<List<ScheduleDTO>> entity
+                        = new GenericEntity<List<ScheduleDTO>>(ScheduleController.toDTOs(activeSport.getSchedules())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_ACTIVE_SPORT";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_ACTIVE_SPORT_SCHEDULES --->" + e.getMessage();
             System.err.println(msg);
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
