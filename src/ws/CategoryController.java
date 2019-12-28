@@ -59,7 +59,7 @@ public class CategoryController {
 
     @POST
     @Path("/")
-    public Response createNewProduct(CategoryDTO categoryDTO) {
+    public Response createNewCategory(CategoryDTO categoryDTO) {
         try {
             Category newCategory = categoryBean.create(categoryDTO.getDescription());
 
@@ -75,7 +75,7 @@ public class CategoryController {
 
     @PUT
     @Path("/{id}")
-    public Response updateProduct(@PathParam("id") int idFromCategoryToUpdate, CategoryDTO categoryDTO) {
+    public Response updateCategory(@PathParam("id") int idFromCategoryToUpdate, CategoryDTO categoryDTO) {
         try {
             Category category = categoryBean.update(idFromCategoryToUpdate, categoryDTO.getDescription());
 
@@ -90,7 +90,7 @@ public class CategoryController {
 
     @DELETE
     @Path("/{id}")
-    public Response deleteProduct(@PathParam("id") int id) {
+    public Response deleteCategory(@PathParam("id") int id) {
         try {
             Category category = categoryBean.delete(id);
 
