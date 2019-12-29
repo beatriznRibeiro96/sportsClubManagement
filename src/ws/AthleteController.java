@@ -2,8 +2,10 @@ package ws;
 
 import dtos.AthleteDTO;
 import dtos.GradeDTO;
+import dtos.EmailDTO;
 import dtos.SportSubscriptionDTO;
 import ejbs.AthleteBean;
+import ejbs.EmailBean;
 import entities.Athlete;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
@@ -12,6 +14,7 @@ import exceptions.MyParseDateException;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
+import javax.mail.MessagingException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
@@ -27,6 +30,12 @@ import java.util.stream.Collectors;
 public class AthleteController {
     @EJB
     private AthleteBean athleteBean;
+
+    @EJB
+    private EmailBean emailBean;
+
+    @Context
+    private SecurityContext securityContext;
 
     public static List<AthleteDTO> toDTOs(Set<Athlete> athletes) {
         return athletes.stream().map(AthleteController::toDTO).collect(Collectors.toList());
@@ -168,5 +177,17 @@ public class AthleteController {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(msg)
                 .build();
+    }
+    @POST
+    @Path("{email}/email/send")
+    public Response sendEmailToAtleta(@PathParam("email") String email, EmailDTO emailDTO) throws MessagingException {
+        Atleta atleta = atletaBean.findAtleta(email);
+        if (atleta != null) {
+            emailBean.send(atleta.getEmail(), emailDTO.getSubject(), emailDTO.getMessage());
+            return Response.status(Response.Status.OK).build();
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+                entity("Atleta with email " + email + " not found.").
+                build();
     }
 }
