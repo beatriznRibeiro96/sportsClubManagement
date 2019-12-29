@@ -8,11 +8,14 @@ import java.util.LinkedHashSet;
 public class EmailDTO implements Serializable {
     private String subject;
     private String message;
+    private Collection<AthleteDTO> recepientes;
 
     public EmailDTO() {
+        this.recepientes = new LinkedHashSet<>();
     }
 
     public EmailDTO(String subject, String message) {
+        this.recepientes = new LinkedHashSet<>();
         this.subject = subject;
         this.message = message;
     }
@@ -31,5 +34,13 @@ public class EmailDTO implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Collection<AthleteDTO> getRecepientes() {
+        return recepientes;
+    }
+
+    public void setRecepientes(Collection<AthleteDTO> recepientes) {
+        this.recepientes = recepientes;
     }
 }
