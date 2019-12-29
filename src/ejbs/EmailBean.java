@@ -16,9 +16,10 @@ import java.util.logging.Logger;
 public class EmailBean {
 
     @Resource(name = "java:/jboss/mail/gmail")
-
     private Session mailSession;
+
     private static final Logger logger = Logger.getLogger("EmailBean.logger");
+
     public void send(String to, String subject, String text) {
         Thread emailJob = new Thread(() -> {
             Message message = new MimeMessage(mailSession);

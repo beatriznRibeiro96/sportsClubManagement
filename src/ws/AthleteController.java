@@ -34,9 +34,6 @@ public class AthleteController {
     @EJB
     private EmailBean emailBean;
 
-    @Context
-    private SecurityContext securityContext;
-
     public static List<AthleteDTO> toDTOs(Set<Athlete> athletes) {
         return athletes.stream().map(AthleteController::toDTO).collect(Collectors.toList());
     }
@@ -179,15 +176,13 @@ public class AthleteController {
                 .build();
     }
     @POST
-    @Path("{email}/email/send")
-    public Response sendEmailToAtleta(@PathParam("email") String email, EmailDTO emailDTO) throws MessagingException {
-        Atleta atleta = atletaBean.findAtleta(email);
-        if (atleta != null) {
-            emailBean.send(atleta.getEmail(), emailDTO.getSubject(), emailDTO.getMessage());
-            return Response.status(Response.Status.OK).build();
+    @Path("{username}/email/send")
+    public Response sendEmailToAthlete(@PathParam("username") String username, EmailDTO email) throws MyEntityNotFoundException {
+        Athlete athlete = athleteBean.find(username);
+        if (athlete == null) {
+            throw new MyEntityNotFoundException("Athlete with username '" + username + "' not found.");
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-                entity("Atleta with email " + email + " not found.").
-                build();
+        emailBean.send(athlete.getEmail(), email.getSubject(), email.getMessage());
+        return Response.status(Response.Status.OK).entity("E-mail sent").build();
     }
 }
