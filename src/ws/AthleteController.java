@@ -7,10 +7,7 @@ import dtos.SportSubscriptionDTO;
 import ejbs.AthleteBean;
 import ejbs.EmailBean;
 import entities.Athlete;
-import exceptions.MyConstraintViolationException;
-import exceptions.MyEntityExistsException;
-import exceptions.MyEntityNotFoundException;
-import exceptions.MyParseDateException;
+import exceptions.*;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -176,13 +173,20 @@ public class AthleteController {
                 .build();
     }
     @POST
-    @Path("{username}/email/send")
-    public Response sendEmailToAthlete(@PathParam("username") String username, EmailDTO email) throws MyEntityNotFoundException {
-        Athlete athlete = athleteBean.find(username);
-        if (athlete == null) {
-            throw new MyEntityNotFoundException("Athlete with username '" + username + "' not found.");
+    @Path("email/send")
+    public Response sendEmailToAthlete(EmailDTO email) throws MyNoRecipientException {
+        String recepientes = "";
+        int counter = 0;
+        for (AthleteDTO athleteDTO:email.getRecepientes()) {
+            if(counter == 0){
+                recepientes = recepientes + athleteDTO.getEmail();
+            }
+            else{
+                recepientes = recepientes + ", " + athleteDTO.getEmail();
+            }
+            counter++;
         }
-        emailBean.send(athlete.getEmail(), email.getSubject(), email.getMessage());
+        emailBean.send(recepientes, email.getSubject(), email.getMessage());
         return Response.status(Response.Status.OK).entity("E-mail sent").build();
     }
 }
