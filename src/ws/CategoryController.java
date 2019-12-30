@@ -34,24 +34,13 @@ public class CategoryController {
 
     @GET
     @Path("/")
-    public List<CategoryDTO> allValidCategories() {
-        try {
-            return toDTOs(categoryBean.getValidCategories());
-        } catch (Exception e) {
-            throw new EJBException("ERROR_GET_VALID_CATEGORIES", e);
-        }
-    }
-
-    @GET
-    @Path("/all")
     public List<CategoryDTO> all() {
         try {
             return toDTOs(categoryBean.all());
         } catch (Exception e) {
-            throw new EJBException("ERROR_GET_ALL_CATEGORIES", e);
+            throw new EJBException("ERROR_GET_CATEGORIES", e);
         }
     }
-
 
     @GET
     @Path("/{id}")
@@ -105,7 +94,11 @@ public class CategoryController {
         try {
             Category category = categoryBean.delete(id);
 
-            return Response.status(Response.Status.OK).build();
+            if(category != null) {
+                return Response.status(Response.Status.OK).entity(toDTO(category)).build();
+            }
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }

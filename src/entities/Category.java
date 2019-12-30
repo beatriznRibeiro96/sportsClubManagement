@@ -12,16 +12,12 @@ import java.util.Set;
         name = "CATEGORIES",
         uniqueConstraints = @UniqueConstraint(columnNames = {"DESCRIPTION"})
 )
-@NamedQueries({
+@NamedQueries(
         @NamedQuery(
                 name = "getAllCategories",
                 query = "SELECT c FROM Category c ORDER BY c.description"
-        ),
-        @NamedQuery(
-                name = "getValidCategories",
-                query = "SELECT c FROM Category c WHERE c.invalid = false ORDER BY c.id"
         )
-})
+)
 public class Category {
 
     @Id
