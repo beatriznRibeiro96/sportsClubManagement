@@ -84,6 +84,52 @@ public class OrderBean {
         }
     }
 
+    public List<OrderDTO> ordersFromUser(String username) {
+        try {
+            List<Order> orders = (List<Order>) em.createNamedQuery("getAllOrders").getResultList();
+            List<OrderDTO> orderDTOs = new ArrayList<>();
+
+            for (Order order:orders) {
+                if(order.getUser().getUsername().equals(username)) {
+                    OrderDTO orderDTO = new OrderDTO(
+                            order.getId(),
+                            order.getPriceTotal(),
+                            order.getUser().getUsername(),
+                            order.getStatus(),
+                            order.getMissing(),
+                            order.isInvalid()
+                    );
+
+                    for (LineItemOrder item : order.getLineItemOrders()) {
+                        orderDTO.getLineItemOrders().add(new LineItemOrderDTO(
+                                item.getId(),
+                                item.getProduct().getId(),
+                                item.getProduct().getDescription(),
+                                item.getOrder().getId(),
+                                item.getQuantity(),
+                                item.getPriceQuantity()
+                        ));
+                    }
+
+                    for (Payment payment : order.getPayments()) {
+                        orderDTO.getPayments().add(new PaymentDTO(
+                                payment.getId(),
+                                payment.getAmount(),
+                                payment.getOrder().getId(),
+                                payment.getMethodPayment().getId()
+                        ));
+                    }
+
+                    orderDTOs.add(orderDTO);
+                }
+            }
+
+            return orderDTOs;
+        } catch (Exception e) {
+            throw new EJBException("ERROR_RETRIEVING_ORDERS_FROM_USER", e);
+        }
+    }
+
     public Order find(int id) {
         try{
             return em.find(Order.class, id);

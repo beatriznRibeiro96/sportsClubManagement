@@ -85,6 +85,16 @@ public class OrderController {
     }
 
     @GET
+    @Path("/{username}")
+    public List<OrderDTO> all(@PathParam("username") String username) {
+        try {
+            return orderBean.ordersFromUser(username);
+        } catch (Exception e) {
+            throw new EJBException("ERROR_GET_ORDERS", e);
+        }
+    }
+
+    @GET
     @Path("/{id}")
     public Response getById(@PathParam("id") int id) {
         try {
