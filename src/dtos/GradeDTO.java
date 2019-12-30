@@ -1,25 +1,26 @@
 package dtos;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
-public class RankDTO implements Serializable {
+public class GradeDTO implements Serializable {
     private int code;
     private String name;
-    private int idadeMin;
-    private int idadeMax;
     private int activeSportCode;
     private String activeSportName;
+    private Collection<AthleteDTO> athletes;
 
-    public RankDTO() {
+    public GradeDTO() {
+        this.athletes = new LinkedHashSet<>();
     }
 
-    public RankDTO(int code, String name, int idadeMin, int idadeMax, int activeSportCode, String activeSportName) {
+    public GradeDTO(int code, String name, int activeSportCode, String activeSportName) {
         this.code = code;
         this.name = name;
-        this.idadeMin = idadeMin;
-        this.idadeMax = idadeMax;
         this.activeSportCode = activeSportCode;
         this.activeSportName = activeSportName;
+        this.athletes = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -38,22 +39,6 @@ public class RankDTO implements Serializable {
         this.name = name;
     }
 
-    public int getIdadeMin() {
-        return idadeMin;
-    }
-
-    public void setIdadeMin(int idadeMin) {
-        this.idadeMin = idadeMin;
-    }
-
-    public int getIdadeMax() {
-        return idadeMax;
-    }
-
-    public void setIdadeMax(int idadeMax) {
-        this.idadeMax = idadeMax;
-    }
-
     public int getActiveSportCode() {
         return activeSportCode;
     }
@@ -68,5 +53,13 @@ public class RankDTO implements Serializable {
 
     public void setActiveSportName(String activeSportName) {
         this.activeSportName = activeSportName;
+    }
+
+    public Collection<AthleteDTO> getAthletes() {
+        return athletes;
+    }
+
+    public void setAthletes(Collection<AthleteDTO> athletes) {
+        this.athletes = athletes;
     }
 }

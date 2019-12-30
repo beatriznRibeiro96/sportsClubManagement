@@ -1,25 +1,38 @@
 package dtos;
 
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
 public class AthleteDTO extends PartnerDTO implements Serializable {
-    private Collection<SportDTO> sports;
+    private Collection<SportSubscriptionDTO> sportSubscriptions;
+    private Collection<GradeDTO> grades;
+
     public AthleteDTO() {
-        this.sports = new LinkedHashSet<>();
+        this.sportSubscriptions = new LinkedHashSet<>();
+        this.grades = new LinkedHashSet<>();
     }
 
-    public AthleteDTO(String username, String password, String name, String email) {
-        super(username, password, name, email);
-        this.sports = new LinkedHashSet<>();
+    public AthleteDTO(String username, String password, String name, String email, String birthDate) {
+        super(username, password, name, email, birthDate);
+        this.sportSubscriptions = new LinkedHashSet<>();
+        this.grades = new LinkedHashSet<>();
     }
 
-    public Collection<SportDTO> getSports() {
-        return sports;
+    public Collection<SportSubscriptionDTO> getSportSubscriptions() {
+        return sportSubscriptions;
     }
 
-    public void setSports(Collection<SportDTO> sports) {
-        this.sports = sports;
+    public void setSportSubscriptions(Collection<SportSubscriptionDTO> sportSubscriptions) {
+        this.sportSubscriptions = sportSubscriptions;
+    }
+
+    public Collection<GradeDTO> getGrades() {
+        return grades;
+    }
+
+    public void setGrades(Collection<GradeDTO> grades) {
+        this.grades = grades;
     }
 }

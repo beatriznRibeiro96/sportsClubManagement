@@ -1,9 +1,12 @@
 package entities;
 
-import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import org.hibernate.validator.constraints.NotBlank;
+
+import javax.persistence.*;
+import javax.validation.constraints.Past;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.Period;
 
 @Entity
 @NamedQueries({
@@ -16,7 +19,7 @@ public class Administrator extends User implements Serializable {
     public Administrator() {
     }
 
-    public Administrator(String username, String password, String name, String email) {
-        super(username, password, name, email);
+    public Administrator(String username, String password, String name, String email, LocalDate birthDate) {
+        super(username, password, name, email, birthDate);
     }
 }
