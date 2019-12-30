@@ -14,14 +14,14 @@ public class ProductDTO implements Serializable {
     private int categoryID;
     private String categoryDescription;
     private  boolean invalid;
-    private int replacingCategoryId;
+    private int replacingProductId;
     private Collection<ProductDTO> replacedBy;
 
     public ProductDTO() {
         this.replacedBy = new LinkedHashSet<>();
     }
 
-    public ProductDTO(int id, String description, double price, int categoryID, String categoryDescription, boolean invalid, int replacingCategoryId) {
+    public ProductDTO(int id, String description, double price, int categoryID, String categoryDescription, boolean invalid, int replacingProductId) {
         this();
         this.id = id;
         this.description = description;
@@ -29,7 +29,7 @@ public class ProductDTO implements Serializable {
         this.categoryID = categoryID;
         this.categoryDescription = categoryDescription;
         this.invalid = invalid;
-        this.replacingCategoryId = replacingCategoryId;
+        this.replacingProductId = replacingProductId;
     }
 
     public int getId() {
@@ -80,12 +80,12 @@ public class ProductDTO implements Serializable {
         this.categoryDescription = categoryDescription;
     }
 
-    public int getReplacingCategoryId() {
-        return replacingCategoryId;
+    public int getReplacingProductId() {
+        return replacingProductId;
     }
 
-    public void setReplacingCategoryId(int replacingCategoryId) {
-        this.replacingCategoryId = replacingCategoryId;
+    public void setReplacingProductId(int replacingProductId) {
+        this.replacingProductId = replacingProductId;
     }
 
     public Collection<ProductDTO> getReplacedBy() {

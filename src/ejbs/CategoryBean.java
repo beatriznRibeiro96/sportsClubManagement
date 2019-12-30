@@ -40,6 +40,14 @@ public class CategoryBean {
         }
     }
 
+    public List<Category> getValidCategories() {
+        try {
+            return (List<Category>) em.createNamedQuery("getValidCategories").getResultList();
+        }catch (Exception e) {
+            throw new EJBException("ERROR_RETRIEVING_VALID_CATEGORIES", e);
+        }
+    }
+
     public Category find(int id) {
         try{
             return em.find(Category.class, id);
