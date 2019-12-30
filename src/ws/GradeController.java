@@ -9,8 +9,10 @@ import exceptions.MyEntityNotFoundException;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +23,8 @@ import java.util.stream.Collectors;
 public class GradeController {
     @EJB
     private GradeBean gradeBean;
+    @Context
+    private SecurityContext securityContext;
 
     public static GradeDTO toDTO(Grade grade){
         return new GradeDTO(
@@ -45,23 +49,26 @@ public class GradeController {
     @GET
     @Path("{code}")
     public Response getGradeDetails(@PathParam("code") int code) {
-        String msg;
-        try {
-            Grade grade = gradeBean.find(code);
-            if (grade != null) {
-                return Response.status(Response.Status.OK)
-                        .entity(toDTO(grade))
-                        .build();
+        if(securityContext.isUserInRole("Administrator")){
+            String msg;
+            try {
+                Grade grade = gradeBean.find(code);
+                if (grade != null) {
+                    return Response.status(Response.Status.OK)
+                            .entity(toDTO(grade))
+                            .build();
+                }
+                msg = "ERROR_FINDING_GRADE";
+                System.err.println(msg);
+            } catch (Exception e) {
+                msg = "ERROR_FETCHING_GRADE_DETAILS --->" + e.getMessage();
+                System.err.println(msg);
             }
-            msg = "ERROR_FINDING_GRADE";
-            System.err.println(msg);
-        } catch (Exception e) {
-            msg = "ERROR_FETCHING_GRADE_DETAILS --->" + e.getMessage();
-            System.err.println(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(msg)
+                    .build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(msg)
-                .build();
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @POST
@@ -75,10 +82,13 @@ public class GradeController {
     @PUT
     @Path("{code}")
     public Response updateGrade(@PathParam("code") int code, GradeDTO gradeDTO) throws MyEntityNotFoundException, MyEntityExistsException {
-        Grade grade = gradeBean.update(code,
-                gradeDTO.getName(),
-                gradeDTO.getActiveSportCode());
-        return Response.status(Response.Status.OK).entity(toDTO(grade)).build();
+        if(securityContext.isUserInRole("Administrator")) {
+            Grade grade = gradeBean.update(code,
+                    gradeDTO.getName(),
+                    gradeDTO.getActiveSportCode());
+            return Response.status(Response.Status.OK).entity(toDTO(grade)).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @DELETE

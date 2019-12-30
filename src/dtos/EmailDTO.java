@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 public class EmailDTO implements Serializable {
     private String subject;
     private String message;
-    private Collection<AthleteDTO> recepientes;
+    private Collection<UserDTO> recepientes;
 
     public EmailDTO() {
         this.recepientes = new LinkedHashSet<>();
@@ -36,11 +36,11 @@ public class EmailDTO implements Serializable {
         this.message = message;
     }
 
-    public Collection<AthleteDTO> getRecepientes() {
+    public Collection<UserDTO> getRecepientes() {
         return recepientes;
     }
 
-    public void setRecepientes(Collection<AthleteDTO> recepientes) {
+    public void setRecepientes(Collection<UserDTO> recepientes) {
         this.recepientes = recepientes;
     }
 }

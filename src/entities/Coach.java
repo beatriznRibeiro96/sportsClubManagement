@@ -15,30 +15,30 @@ import java.util.Set;
 })
 public class Coach extends User implements Serializable {
     @ManyToMany(mappedBy = "coaches")
-    private Set<ActiveSport> activeSports;
+    private Set<Rank> ranks;
 
     public Coach() {
-        this.activeSports = new LinkedHashSet<>();
+        this.ranks = new LinkedHashSet<>();
     }
 
     public Coach(String username, String password, String name, String email, LocalDate birthDate) {
         super(username, password, name, email, birthDate);
-        this.activeSports = new LinkedHashSet<>();
+        this.ranks = new LinkedHashSet<>();
     }
 
-    public Set<ActiveSport> getActiveSports() {
-        return activeSports;
+    public Set<Rank> getRanks() {
+        return ranks;
     }
 
-    public void setActiveSports(Set<ActiveSport> activeSports) {
-        this.activeSports = activeSports;
+    public void setRanks(Set<Rank> ranks) {
+        this.ranks = ranks;
     }
 
-    public void addActiveSport(ActiveSport activeSport) {
-        activeSports.add(activeSport);
+    public void addRank(Rank rank) {
+        ranks.add(rank);
     }
 
-    public void removeActiveSport(ActiveSport activeSport){
-        activeSports.remove(activeSport);
+    public void removeRank(Rank rank){
+        ranks.remove(rank);
     }
 }

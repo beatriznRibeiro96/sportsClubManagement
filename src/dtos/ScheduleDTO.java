@@ -9,21 +9,21 @@ public class ScheduleDTO implements Serializable {
     private String dayOfWeekName;
     private String startTime;
     private String endTime;
-    private int activeSportCode;
-    private String activeSportName;
+    private int rankCode;
+    private String rankName;
 
     public ScheduleDTO() {
     }
 
-    public ScheduleDTO(int code, String name, int dayOfWeekCode, String dayOfWeekName, String startTime, String endTime, int activeSportCode, String activeSportName) {
+    public ScheduleDTO(int code, String name, int dayOfWeekCode, String dayOfWeekName, String startTime, String endTime, int rankCode, String rankName) {
         this.code = code;
         this.name = name;
         this.dayOfWeekCode = dayOfWeekCode;
         this.dayOfWeekName = dayOfWeekName;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.activeSportCode = activeSportCode;
-        this.activeSportName = activeSportName;
+        this.rankCode = rankCode;
+        this.rankName = rankName;
     }
 
     public int getCode() {
@@ -74,19 +74,19 @@ public class ScheduleDTO implements Serializable {
         this.endTime = endTime;
     }
 
-    public int getActiveSportCode() {
-        return activeSportCode;
+    public int getRankCode() {
+        return rankCode;
     }
 
-    public void setActiveSportCode(int activeSportCode) {
-        this.activeSportCode = activeSportCode;
+    public void setRankCode(int rankCode) {
+        this.rankCode = rankCode;
     }
 
-    public String getActiveSportName() {
-        return activeSportName;
+    public String getRankName() {
+        return rankName;
     }
 
-    public void setActiveSportName(String activeSportName) {
-        this.activeSportName = activeSportName;
+    public void setRankName(String rankName) {
+        this.rankName = rankName;
     }
 }

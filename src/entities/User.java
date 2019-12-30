@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 @Table(name ="USERS", uniqueConstraints = @UniqueConstraint(columnNames = {"EMAIL"}))
 @MappedSuperclass
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public abstract class User implements Serializable {
+public class User implements Serializable {
     @Id
     @NotBlank(message = "username is mandatory")
     protected String username;

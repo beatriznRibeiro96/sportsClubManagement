@@ -1,7 +1,9 @@
 package ejbs;
 
 import entities.ActiveSport;
+import entities.Coach;
 import entities.Rank;
+import entities.SportSubscription;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
@@ -15,6 +17,7 @@ import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Set;
 
 @Stateless(name = "RankEJB")
 public class RankBean {
@@ -23,6 +26,9 @@ public class RankBean {
 
     @EJB
     private ActiveSportBean activeSportBean;
+
+    @EJB
+    private CoachBean coachBean;
 
     public Rank create (String name, int idadeMin, int idadeMax, int activeSportCode) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
         try {
@@ -101,12 +107,62 @@ public class RankBean {
             if(rank == null){
                 throw new MyEntityNotFoundException("Rank with code '" + code + "' not found.");
             }
+            Set<Coach> coaches = rank.getCoaches();
+            if(coaches != null){
+                for (Coach coach:coaches) {
+                    coach.removeRank(rank);
+                }
+            }
+            Set<SportSubscription> sportSubscriptions = rank.getSportSubscriptions();
+            if(sportSubscriptions != null){
+                for (SportSubscription sportSubscription:sportSubscriptions) {
+                    sportSubscription.getAthlete().removeSportSubscription(sportSubscription);
+                }
+            }
             rank.getActiveSport().removeRank(rank);
             em.remove(rank);
         } catch (MyEntityNotFoundException e) {
             throw e;
         } catch (Exception e){
             throw new EJBException("ERROR_DELETING_RANK", e);
+        }
+    }
+
+    public void associateCoach(int rankCode, String coachUsername) throws MyEntityNotFoundException {
+        try{
+            Rank rank = find(rankCode);
+            if (rank == null) {
+                throw new MyEntityNotFoundException("Rank with code: " + rankCode + " not found.");
+            }
+            Coach coach = coachBean.find(coachUsername);
+            if (coach == null) {
+                throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
+            }
+            coach.addRank(rank);
+            rank.addCoach(coach);
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
+            throw new EJBException("ERROR_ASSOCIATE_COACH", e);
+        }
+    }
+
+    public void dissociateCoach(int rankCode, String coachUsername) throws MyEntityNotFoundException {
+        try{
+            Rank rank = find(rankCode);
+            if (rank == null) {
+                throw new MyEntityNotFoundException("Rank with code: " + rankCode + " not found.");
+            }
+            Coach coach = coachBean.find(coachUsername);
+            if (coach == null) {
+                throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
+            }
+            coach.removeRank(rank);
+            rank.removeCoach(coach);
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
+            throw new EJBException("ERROR_DISSOCIATE_COACH", e);
         }
     }
 }

@@ -2,6 +2,7 @@ package ejbs;
 
 import entities.ActiveSport;
 import entities.Coach;
+import entities.Rank;
 import entities.Sport;
 import exceptions.*;
 
@@ -24,7 +25,7 @@ public class CoachBean {
     private EntityManager em;
 
     @EJB
-    private ActiveSportBean activeSportBean;
+    private RankBean rankBean;
 
     public Coach create (String username,String password, String name, String email, String birthDate) throws MyEntityExistsException, MyConstraintViolationException, MyParseDateException {
         try {
@@ -93,10 +94,10 @@ public class CoachBean {
             if(coach == null){
                 throw new MyEntityNotFoundException("Username '" + username + "' not found.");
             }
-            Set<ActiveSport> activeSports = coach.getActiveSports();
-            if(activeSports != null){
-                for (ActiveSport activeSport:activeSports) {
-                    activeSport.removeCoach(coach);
+            Set<Rank> ranks = coach.getRanks();
+            if(ranks != null){
+                for (Rank rank:ranks) {
+                    rank.removeCoach(coach);
                 }
             }
             em.remove(coach);
@@ -107,44 +108,44 @@ public class CoachBean {
         }
     }
 
-    public void associateCoachToActiveSport(String coachUsername, int activeSportCode) throws MyEntityNotFoundException, MyIllegalArgumentException {
+    public void associateCoachToRank(String coachUsername, int rankCode) throws MyEntityNotFoundException, MyIllegalArgumentException {
         try{
             Coach coach = find(coachUsername);
             if (coach == null) {
                 throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
             }
-            ActiveSport activeSport = activeSportBean.find(activeSportCode);
-            if (activeSport == null) {
-                throw new MyEntityNotFoundException("Active Sport not found.");
+            Rank rank = rankBean.find(rankCode);
+            if (rank == null) {
+                throw new MyEntityNotFoundException("Rank not found.");
             }
-            if(coach.getActiveSports().contains(activeSport)){
-                throw new MyIllegalArgumentException("Coach is already enrolled in active sport with code '" + activeSportCode + "'");
+            if(coach.getRanks().contains(rank)){
+                throw new MyIllegalArgumentException("Coach is already enrolled in rank with code '" + rankCode + "'");
             }
-            coach.addActiveSport(activeSport);
-            activeSport.addCoach(coach);
+            coach.addRank(rank);
+            rank.addCoach(coach);
         } catch (MyEntityNotFoundException | MyIllegalArgumentException e) {
             throw e;
         } catch (Exception e){
-            throw new EJBException("ERROR_ASSOCIATE_COACH_TO_ACTIVE_SPORT", e);
+            throw new EJBException("ERROR_ASSOCIATE_COACH_TO_RANK", e);
         }
     }
 
-    public void dissociateCoachFromActiveSport(String coachUsername, int activeSportCode) throws MyEntityNotFoundException {
+    public void dissociateCoachFromRank(String coachUsername, int rankCode) throws MyEntityNotFoundException {
         try{
             Coach coach = find(coachUsername);
             if (coach == null) {
                 throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
             }
-            ActiveSport activeSport = activeSportBean.find(activeSportCode);
-            if (activeSport == null) {
-                throw new MyEntityNotFoundException("Active Sport not found.");
+            Rank rank = rankBean.find(rankCode);
+            if (rank == null) {
+                throw new MyEntityNotFoundException("Rank not found.");
             }
-            activeSport.removeCoach(coach);
-            coach.removeActiveSport(activeSport);
+            rank.removeCoach(coach);
+            coach.removeRank(rank);
         } catch (MyEntityNotFoundException e) {
             throw e;
         } catch (Exception e){
-            throw new EJBException("ERROR_DISSOCIATE_COACH_FROM_ACTIVE_SPORT", e);
+            throw new EJBException("ERROR_DISSOCIATE_COACH_FROM_RANK", e);
         }
     }
 }

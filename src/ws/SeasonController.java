@@ -10,8 +10,10 @@ import exceptions.MyEntityNotFoundException;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 public class SeasonController {
     @EJB
     private SeasonBean seasonBean;
+    @Context
+    private SecurityContext securityContext;
 
     public static SeasonDTO toDTO(Season season){
         return new SeasonDTO(
@@ -44,23 +48,26 @@ public class SeasonController {
     @GET
     @Path("{code}")
     public Response getSeasonDetails(@PathParam("code") int code) {
-        String msg;
-        try {
-            Season season = seasonBean.find(code);
-            if (season != null) {
-                return Response.status(Response.Status.OK)
-                        .entity(toDTO(season))
-                        .build();
+        if(securityContext.isUserInRole("Administrator")){
+            String msg;
+            try {
+                Season season = seasonBean.find(code);
+                if (season != null) {
+                    return Response.status(Response.Status.OK)
+                            .entity(toDTO(season))
+                            .build();
+                }
+                msg = "ERROR_FINDING_SEASON";
+                System.err.println(msg);
+            } catch (Exception e) {
+                msg = "ERROR_FETCHING_SEASON_DETAILS --->" + e.getMessage();
+                System.err.println(msg);
             }
-            msg = "ERROR_FINDING_SEASON";
-            System.err.println(msg);
-        } catch (Exception e) {
-            msg = "ERROR_FETCHING_SEASON_DETAILS --->" + e.getMessage();
-            System.err.println(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(msg)
+                    .build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(msg)
-                .build();
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @POST
@@ -73,9 +80,12 @@ public class SeasonController {
     @PUT
     @Path("{code}")
     public Response updateSeason(@PathParam("code") int code, SeasonDTO seasonDTO) throws MyEntityNotFoundException, MyEntityExistsException {
-        Season season = seasonBean.update(code,
-                seasonDTO.getName());
-        return Response.status(Response.Status.OK).entity(toDTO(season)).build();
+        if(securityContext.isUserInRole("Administrator")) {
+            Season season = seasonBean.update(code,
+                    seasonDTO.getName());
+            return Response.status(Response.Status.OK).entity(toDTO(season)).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @DELETE

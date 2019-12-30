@@ -1,9 +1,6 @@
 package ejbs;
 
-import entities.ActiveSport;
-import entities.Coach;
-import entities.Season;
-import entities.Sport;
+import entities.*;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
@@ -28,8 +25,6 @@ public class ActiveSportBean {
     private SportBean sportBean;
     @EJB
     private SeasonBean seasonBean;
-    @EJB
-    private CoachBean coachBean;
 
     public ActiveSport create (String name, int sportCode, int seasonCode) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
         try {
@@ -110,55 +105,12 @@ public class ActiveSportBean {
             if(activeSport == null){
                 throw new MyEntityNotFoundException("Active Sport with code '" + code + "' not found.");
             }
-            Set<Coach> coaches = activeSport.getCoaches();
-            if(coaches != null){
-                for (Coach coach:coaches) {
-                    coach.removeActiveSport(activeSport);
-                }
-            }
+            activeSport.getRanks().clear();
             em.remove(activeSport);
         } catch (MyEntityNotFoundException e) {
             throw e;
         } catch (Exception e){
             throw new EJBException("ERROR_DELETING_ACTIVE_SPORT", e);
-        }
-    }
-
-    public void associateCoach(int activeSportCode, String coachUsername) throws MyEntityNotFoundException {
-        try{
-            ActiveSport activeSport = find(activeSportCode);
-            if (activeSport == null) {
-                throw new MyEntityNotFoundException("Active Sport with code: " + activeSportCode + " not found.");
-            }
-            Coach coach = coachBean.find(coachUsername);
-            if (coach == null) {
-                throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
-            }
-            coach.addActiveSport(activeSport);
-            activeSport.addCoach(coach);
-        } catch (MyEntityNotFoundException e) {
-            throw e;
-        } catch (Exception e){
-            throw new EJBException("ERROR_ASSOCIATE_COACH", e);
-        }
-    }
-
-    public void dissociateCoach(int activeSportCode, String coachUsername) throws MyEntityNotFoundException {
-        try{
-            ActiveSport activeSport = find(activeSportCode);
-            if (activeSport == null) {
-                throw new MyEntityNotFoundException("Active Sport with code: " + activeSportCode + " not found.");
-            }
-            Coach coach = coachBean.find(coachUsername);
-            if (coach == null) {
-                throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
-            }
-            coach.removeActiveSport(activeSport);
-            activeSport.removeCoach(coach);
-        } catch (MyEntityNotFoundException e) {
-            throw e;
-        } catch (Exception e){
-            throw new EJBException("ERROR_DISSOCIATE_COACH", e);
         }
     }
 }
