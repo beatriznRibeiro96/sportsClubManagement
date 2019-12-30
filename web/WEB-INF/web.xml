@@ -5,11 +5,171 @@
          version="4.0">
 
     <security-constraint>
-    <web-resource-collection>
-        <web-resource-name>Administrators List</web-resource-name>
-        <url-pattern>/api/administrators</url-pattern>
-        <http-method>GET</http-method>
-    </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Administrators List</web-resource-name>
+            <url-pattern>/api/administrators</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Coaches List</web-resource-name>
+            <url-pattern>/api/coaches</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Partners List</web-resource-name>
+            <url-pattern>/api/partners</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Athletes List</web-resource-name>
+            <url-pattern>/api/athletes</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Sports List</web-resource-name>
+            <url-pattern>/api/sports</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Active Sports List</web-resource-name>
+            <url-pattern>/api/activeSports</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Sport Subscriptions List</web-resource-name>
+            <url-pattern>/api/sportSubscriptions</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Ranks List</web-resource-name>
+            <url-pattern>/api/ranks</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Seasons List</web-resource-name>
+            <url-pattern>/api/seasons</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Grades List</web-resource-name>
+            <url-pattern>/api/grades</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Schedules List</web-resource-name>
+            <url-pattern>/api/schedules</url-pattern>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Administrators create</web-resource-name>
+            <url-pattern>/api/administrators</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Coaches create</web-resource-name>
+            <url-pattern>/api/coaches</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Partners create</web-resource-name>
+            <url-pattern>/api/partners</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Athletes create</web-resource-name>
+            <url-pattern>/api/athletes</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Sports create</web-resource-name>
+            <url-pattern>/api/sports</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Active Sports create</web-resource-name>
+            <url-pattern>/api/activeSports</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Sport Subscriptions create</web-resource-name>
+            <url-pattern>/api/sportSubscriptions</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Ranks create</web-resource-name>
+            <url-pattern>/api/ranks</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Seasons create</web-resource-name>
+            <url-pattern>/api/seasons</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Grades create</web-resource-name>
+            <url-pattern>/api/grades</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Schedules create</web-resource-name>
+            <url-pattern>/api/schedules</url-pattern>
+            <http-method>POST</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Administrators delete</web-resource-name>
+            <url-pattern>/api/administrators/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Coaches delete</web-resource-name>
+            <url-pattern>/api/coaches/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Partners delete</web-resource-name>
+            <url-pattern>/api/partners/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Athletes delete</web-resource-name>
+            <url-pattern>/api/athletes/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Sports delete</web-resource-name>
+            <url-pattern>/api/sports/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Active Sports delete</web-resource-name>
+            <url-pattern>/api/activeSports/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Sport Subscriptions delete</web-resource-name>
+            <url-pattern>/api/sportSubscriptions/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Ranks delete</web-resource-name>
+            <url-pattern>/api/ranks/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Seasons delete</web-resource-name>
+            <url-pattern>/api/seasons/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Grades delete</web-resource-name>
+            <url-pattern>/api/grades/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Schedules delete</web-resource-name>
+            <url-pattern>/api/schedules/*</url-pattern>
+            <http-method>DELETE</http-method>
+        </web-resource-collection>
         <auth-constraint>
             <role-name>Administrator</role-name>
         </auth-constraint>

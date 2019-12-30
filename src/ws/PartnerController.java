@@ -11,8 +11,11 @@ import exceptions.MyParseDateException;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.security.Principal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +26,9 @@ import java.util.stream.Collectors;
 public class PartnerController {
     @EJB
     private PartnerBean partnerBean;
+
+    @Context
+    private SecurityContext securityContext;
 
     // Converts an entity Partner to a DTO Partner class
     private PartnerDTO toDTO(Partner partner){
@@ -49,23 +55,27 @@ public class PartnerController {
     @GET
     @Path("{username}")
     public Response getPartnerDetails(@PathParam("username") String username) {
-        String msg;
-        try {
-            Partner partner = partnerBean.find(username);
-            if (partner != null) {
-                return Response.status(Response.Status.OK)
-                        .entity(toDTO(partner))
-                        .build();
+        Principal principal = securityContext.getUserPrincipal();
+        if(securityContext.isUserInRole("Administrator") || principal.getName().equals(username)) {
+            String msg;
+            try {
+                Partner partner = partnerBean.find(username);
+                if (partner != null) {
+                    return Response.status(Response.Status.OK)
+                            .entity(toDTO(partner))
+                            .build();
+                }
+                msg = "ERROR_FINDING_PARTNER";
+                System.err.println(msg);
+            } catch (Exception e) {
+                msg = "ERROR_FETCHING_PARTNER_DETAILS --->" + e.getMessage();
+                System.err.println(msg);
             }
-            msg = "ERROR_FINDING_PARTNER";
-            System.err.println(msg);
-        } catch (Exception e) {
-            msg = "ERROR_FETCHING_PARTNER_DETAILS --->" + e.getMessage();
-            System.err.println(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(msg)
+                    .build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(msg)
-                .build();
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @POST
@@ -82,12 +92,15 @@ public class PartnerController {
     @PUT
     @Path("{username}")
     public Response updatePartner(@PathParam("username") String username, PartnerDTO partnerDTO) throws MyEntityNotFoundException, MyParseDateException {
-        Partner partner = partnerBean.update(username,
-                partnerDTO.getPassword(),
-                partnerDTO.getName(),
-                partnerDTO.getEmail(),
-                partnerDTO.getBirthDate());
-        return Response.status(Response.Status.OK).entity(toDTO(partner)).build();
+        if(securityContext.isUserInRole("Administrator")) {
+            Partner partner = partnerBean.update(username,
+                    partnerDTO.getPassword(),
+                    partnerDTO.getName(),
+                    partnerDTO.getEmail(),
+                    partnerDTO.getBirthDate());
+            return Response.status(Response.Status.OK).entity(toDTO(partner)).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @DELETE

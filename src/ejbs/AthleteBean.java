@@ -2,6 +2,7 @@ package ejbs;
 
 import entities.Athlete;
 import entities.Grade;
+import entities.SportSubscription;
 import exceptions.*;
 
 import javax.ejb.EJB;
@@ -88,6 +89,9 @@ public class AthleteBean {
             Athlete athlete = find(username);
             if(athlete == null){
                 throw new MyEntityNotFoundException("Username '" + username + "' not found.");
+            }
+            for (SportSubscription sportSubscription:athlete.getSportSubscriptions()) {
+                sportSubscription.getRank().removeSportSubscription(sportSubscription);
             }
             em.remove(athlete);
         } catch (MyEntityNotFoundException e) {

@@ -16,8 +16,8 @@ import java.time.temporal.ChronoUnit;
                 query = "SELECT sch FROM Schedule sch ORDER BY sch.name"
         ),
         @NamedQuery(
-                name = "countSchedulesByNameAndActiveSport",
-                query = "SELECT count(sch) FROM Schedule sch WHERE sch.name = :name AND sch.activeSport = :activeSport"
+                name = "countSchedulesByNameAndRank",
+                query = "SELECT count(sch) FROM Schedule sch WHERE sch.name = :name AND sch.rank = :rank"
         )
 })
 public class Schedule implements Serializable {
@@ -33,19 +33,19 @@ public class Schedule implements Serializable {
     private LocalTime endTime;
 
     @ManyToOne
-    private ActiveSport activeSport;
+    private Rank rank;
     @Version
     private int version;
 
     public Schedule() {
     }
 
-    public Schedule(String name, DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime, ActiveSport activeSport) {
+    public Schedule(String name, DayOfWeek dayOfWeek, LocalTime startTime, LocalTime endTime, Rank rank) {
         this.name = name;
         this.dayOfWeek = dayOfWeek;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.activeSport = activeSport;
+        this.rank = rank;
     }
 
     public int getCode() {
@@ -88,12 +88,12 @@ public class Schedule implements Serializable {
         this.endTime = endTime;
     }
 
-    public ActiveSport getActiveSport() {
-        return activeSport;
+    public Rank getRank() {
+        return rank;
     }
 
-    public void setActiveSport(ActiveSport activeSport) {
-        this.activeSport = activeSport;
+    public void setRank(Rank rank) {
+        this.rank = rank;
     }
 
     public long duration(){

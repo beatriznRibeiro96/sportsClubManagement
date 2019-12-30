@@ -1,5 +1,6 @@
 package ws;
 
+import dtos.ActiveSportDTO;
 import dtos.ScheduleDTO;
 import ejbs.ScheduleBean;
 import entities.Schedule;
@@ -7,8 +8,7 @@ import exceptions.*;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Collection;
@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 public class ScheduleController {
     @EJB
     private ScheduleBean scheduleBean;
+    @Context
+    private SecurityContext securityContext;
 
     public static ScheduleDTO toDTO(Schedule schedule){
         return new ScheduleDTO(
@@ -29,10 +31,10 @@ public class ScheduleController {
                 schedule.getName(),
                 schedule.getDayOfWeek().ordinal(),
                 schedule.getDayOfWeek().name(),
-                schedule.getStartTime().format(DateTimeFormatter.ofPattern("H:mm")),
-                schedule.getEndTime().format(DateTimeFormatter.ofPattern("H:mm")),
-                schedule.getActiveSport().getCode(),
-                schedule.getActiveSport().getName()
+                schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")),
+                schedule.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")),
+                schedule.getRank().getCode(),
+                schedule.getRank().getName()
         );
     }
 
@@ -50,23 +52,26 @@ public class ScheduleController {
     @GET
     @Path("{code}")
     public Response getScheduleDetails(@PathParam("code") int code) {
-        String msg;
-        try {
-            Schedule schedule = scheduleBean.find(code);
-            if (schedule != null) {
-                return Response.status(Response.Status.OK)
-                        .entity(toDTO(schedule))
-                        .build();
+        if(securityContext.isUserInRole("Administrator")){
+            String msg;
+            try {
+                Schedule schedule = scheduleBean.find(code);
+                if (schedule != null) {
+                    return Response.status(Response.Status.OK)
+                            .entity(toDTO(schedule))
+                            .build();
+                }
+                msg = "ERROR_FINDING_SCHEDULE";
+                System.err.println(msg);
+            } catch (Exception e) {
+                msg = "ERROR_FETCHING_SCHEDULE_DETAILS --->" + e.getMessage();
+                System.err.println(msg);
             }
-            msg = "ERROR_FINDING_SCHEDULE";
-            System.err.println(msg);
-        } catch (Exception e) {
-            msg = "ERROR_FETCHING_SCHEDULE_DETAILS --->" + e.getMessage();
-            System.err.println(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(msg)
+                    .build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(msg)
-                .build();
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @POST
@@ -76,20 +81,23 @@ public class ScheduleController {
                 scheduleDTO.getDayOfWeekCode(),
                 scheduleDTO.getStartTime(),
                 scheduleDTO.getEndTime(),
-                scheduleDTO.getActiveSportCode());
+                scheduleDTO.getRankCode());
         return Response.status(Response.Status.CREATED).entity(toDTO(schedule)).build();
     }
 
     @PUT
     @Path("{code}")
     public Response updateSchedule(@PathParam("code") int code, ScheduleDTO scheduleDTO) throws MyEntityNotFoundException, MyEntityExistsException, MyParseDateException, MyIllegalArgumentException {
-        Schedule schedule = scheduleBean.update(code,
-                scheduleDTO.getName(),
-                scheduleDTO.getDayOfWeekCode(),
-                scheduleDTO.getStartTime(),
-                scheduleDTO.getEndTime(),
-                scheduleDTO.getActiveSportCode());
-        return Response.status(Response.Status.OK).entity(toDTO(schedule)).build();
+        if(securityContext.isUserInRole("Administrator")) {
+            Schedule schedule = scheduleBean.update(code,
+                    scheduleDTO.getName(),
+                    scheduleDTO.getDayOfWeekCode(),
+                    scheduleDTO.getStartTime(),
+                    scheduleDTO.getEndTime(),
+                    scheduleDTO.getRankCode());
+            return Response.status(Response.Status.OK).entity(toDTO(schedule)).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @DELETE
@@ -97,5 +105,30 @@ public class ScheduleController {
     public Response deleteSchedule (@PathParam("code") int code) throws MyEntityNotFoundException{
         scheduleBean.delete(code);
         return Response.status(Response.Status.OK).build();
+    }
+
+    @GET
+    @Path("{code}/activeSport")
+    public Response getScheduleActiveSport(@PathParam("code") int code) {
+        String msg;
+        try {
+            Schedule schedule = scheduleBean.find(code);
+            if (schedule != null) {
+                GenericEntity<ActiveSportDTO> entity
+                        = new GenericEntity<ActiveSportDTO>(ActiveSportController.toDTO(schedule.getRank().getActiveSport())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_RANK";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_RANK_ATHLETES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
     }
 }

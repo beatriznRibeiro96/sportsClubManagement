@@ -10,8 +10,10 @@ import exceptions.MyEntityNotFoundException;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 public class SportController {
     @EJB
     private SportBean sportBean;
+    @Context
+    private SecurityContext securityContext;
 
     public static SportDTO toDTO(Sport sport){
         return new SportDTO(
@@ -44,23 +48,26 @@ public class SportController {
     @GET
     @Path("{code}")
     public Response getSportDetails(@PathParam("code") int code) {
-        String msg;
-        try {
-            Sport sport = sportBean.find(code);
-            if (sport != null) {
-                return Response.status(Response.Status.OK)
-                        .entity(toDTO(sport))
-                        .build();
+        if(securityContext.isUserInRole("Administrator")) {
+            String msg;
+            try {
+                Sport sport = sportBean.find(code);
+                if (sport != null) {
+                    return Response.status(Response.Status.OK)
+                            .entity(toDTO(sport))
+                            .build();
+                }
+                msg = "ERROR_FINDING_SPORT";
+                System.err.println(msg);
+            } catch (Exception e) {
+                msg = "ERROR_FETCHING_SPORT_DETAILS --->" + e.getMessage();
+                System.err.println(msg);
             }
-            msg = "ERROR_FINDING_SPORT";
-            System.err.println(msg);
-        } catch (Exception e) {
-            msg = "ERROR_FETCHING_SPORT_DETAILS --->" + e.getMessage();
-            System.err.println(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(msg)
+                    .build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(msg)
-                .build();
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @POST
@@ -73,9 +80,12 @@ public class SportController {
     @PUT
     @Path("{code}")
     public Response updateSport(@PathParam("code") int code, SportDTO sportDTO) throws MyEntityNotFoundException, MyEntityExistsException {
-        Sport sport = sportBean.update(code,
-                sportDTO.getName());
-        return Response.status(Response.Status.OK).entity(toDTO(sport)).build();
+        if(securityContext.isUserInRole("Administrator")) {
+            Sport sport = sportBean.update(code,
+                    sportDTO.getName());
+            return Response.status(Response.Status.OK).entity(toDTO(sport)).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @DELETE

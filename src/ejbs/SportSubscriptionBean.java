@@ -44,6 +44,7 @@ public class SportSubscriptionBean {
             }
             SportSubscription sportSubscription = new SportSubscription(name, rank, athlete);
             em.persist(sportSubscription);
+            rank.addSportSubscription(sportSubscription);
             athlete.addSportSubscription(sportSubscription);
             return sportSubscription;
         } catch (MyEntityExistsException | MyEntityNotFoundException e) {
@@ -95,7 +96,11 @@ public class SportSubscriptionBean {
                 athlete.addSportSubscription(sportSubscription);
                 sportSubscription.setAthlete(athlete);
             }
-            sportSubscription.setRank(rank);
+            if(!rank.getSportSubscriptions().contains(sportSubscription)){
+                sportSubscription.getRank().removeSportSubscription(sportSubscription);
+                rank.addSportSubscription(sportSubscription);
+                sportSubscription.setRank(rank);
+            }
             sportSubscription.setName(name);
             em.merge(sportSubscription);
             return sportSubscription;
@@ -113,8 +118,12 @@ public class SportSubscriptionBean {
                 throw new MyEntityNotFoundException("Sport Subscription with code '" + code + "' not found.");
             }
             Athlete athlete = sportSubscription.getAthlete();
+            Rank rank = sportSubscription.getRank();
             if(athlete != null){
                 athlete.removeSportSubscription(sportSubscription);
+            }
+            if(rank != null){
+                rank.removeSportSubscription(sportSubscription);
             }
             em.remove(sportSubscription);
         }catch (Exception e){

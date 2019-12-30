@@ -2,7 +2,7 @@ package ws;
 
 import dtos.*;
 import ejbs.ActiveSportBean;
-import entities.ActiveSport;
+import entities.*;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
@@ -10,11 +10,9 @@ import exceptions.MyEntityNotFoundException;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.Collection;
-import java.util.List;
+import javax.ws.rs.core.*;
+import java.security.Principal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Path("/activeSports") // relative url web path of this controller
@@ -23,6 +21,8 @@ import java.util.stream.Collectors;
 public class ActiveSportController {
     @EJB
     private ActiveSportBean activeSportBean;
+    @Context
+    private SecurityContext securityContext;
 
     public static ActiveSportDTO toDTO(ActiveSport activeSport){
         return new ActiveSportDTO(
@@ -49,23 +49,26 @@ public class ActiveSportController {
     @GET
     @Path("{code}")
     public Response getActiveSportDetails(@PathParam("code") int code) {
-        String msg;
-        try {
-            ActiveSport activeSport = activeSportBean.find(code);
-            if (activeSport != null) {
-                return Response.status(Response.Status.OK)
-                        .entity(toDTO(activeSport))
-                        .build();
+        if(securityContext.isUserInRole("Administrator")){
+            String msg;
+            try {
+                ActiveSport activeSport = activeSportBean.find(code);
+                if (activeSport != null) {
+                    return Response.status(Response.Status.OK)
+                            .entity(toDTO(activeSport))
+                            .build();
+                }
+                msg = "ERROR_FINDING_ACTIVE_SPORT";
+                System.err.println(msg);
+            } catch (Exception e) {
+                msg = "ERROR_FETCHING_ACTIVE_SPORT_DETAILS --->" + e.getMessage();
+                System.err.println(msg);
             }
-            msg = "ERROR_FINDING_ACTIVE_SPORT";
-            System.err.println(msg);
-        } catch (Exception e) {
-            msg = "ERROR_FETCHING_ACTIVE_SPORT_DETAILS --->" + e.getMessage();
-            System.err.println(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(msg)
+                    .build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(msg)
-                .build();
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @POST
@@ -80,11 +83,14 @@ public class ActiveSportController {
     @PUT
     @Path("{code}")
     public Response updateActiveSport(@PathParam("code") int code, ActiveSportDTO activeSportDTO) throws MyEntityNotFoundException, MyEntityExistsException {
-        ActiveSport activeSport = activeSportBean.update(code,
-                activeSportDTO.getName(),
-                activeSportDTO.getSportCode(),
-                activeSportDTO.getSeasonCode());
-        return Response.status(Response.Status.OK).entity(toDTO(activeSport)).build();
+        if(securityContext.isUserInRole("Administrator")) {
+            ActiveSport activeSport = activeSportBean.update(code,
+                    activeSportDTO.getName(),
+                    activeSportDTO.getSportCode(),
+                    activeSportDTO.getSeasonCode());
+            return Response.status(Response.Status.OK).entity(toDTO(activeSport)).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @DELETE
@@ -100,9 +106,13 @@ public class ActiveSportController {
         String msg;
         try {
             ActiveSport activeSport = activeSportBean.find(code);
+            Set<Coach> coaches = new LinkedHashSet<>();
             if (activeSport != null) {
+                for (Rank rank:activeSport.getRanks()) {
+                    coaches.addAll(rank.getCoaches());
+                }
                 GenericEntity<List<CoachDTO>> entity
-                        = new GenericEntity<List<CoachDTO>>(CoachController.toDTOs(activeSport.getCoaches())) {
+                        = new GenericEntity<List<CoachDTO>>(CoachController.toDTOs(coaches)) {
                 };
                 return Response.status(Response.Status.OK)
                         .entity(entity)
@@ -175,9 +185,13 @@ public class ActiveSportController {
         String msg;
         try {
             ActiveSport activeSport = activeSportBean.find(code);
+            Set<Schedule> schedules = new LinkedHashSet<>();
             if (activeSport != null) {
+                for (Rank rank:activeSport.getRanks()) {
+                    schedules.addAll(rank.getSchedules());
+                }
                 GenericEntity<List<ScheduleDTO>> entity
-                        = new GenericEntity<List<ScheduleDTO>>(ScheduleController.toDTOs(activeSport.getSchedules())) {
+                        = new GenericEntity<List<ScheduleDTO>>(ScheduleController.toDTOs(schedules)) {
                 };
                 return Response.status(Response.Status.OK)
                         .entity(entity)
@@ -187,6 +201,39 @@ public class ActiveSportController {
             System.err.println(msg);
         } catch (Exception e) {
             msg = "ERROR_FETCHING_ACTIVE_SPORT_SCHEDULES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
+
+    @GET
+    @Path("{code}/athletes")
+    public Response getActiveSportAthletes(@PathParam("code") int code) {
+        String msg;
+        try {
+            ActiveSport activeSport = activeSportBean.find(code);
+            Set<Athlete> athletes = new LinkedHashSet<>();
+            Set<SportSubscription> sportSubscriptions = new LinkedHashSet<>();
+            if (activeSport != null) {
+                for (Rank rank:activeSport.getRanks()) {
+                    sportSubscriptions.addAll(rank.getSportSubscriptions());
+                }
+                for (SportSubscription sportSubscription:sportSubscriptions) {
+                    athletes.add(sportSubscription.getAthlete());
+                }
+                GenericEntity<List<AthleteDTO>> entity
+                        = new GenericEntity<List<AthleteDTO>>(AthleteController.toDTOs(athletes)) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_ACTIVE_SPORT";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_ACTIVE_SPORT_ATHLETES --->" + e.getMessage();
             System.err.println(msg);
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
