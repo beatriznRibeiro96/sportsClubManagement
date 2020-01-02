@@ -95,13 +95,12 @@ public class OrderController {
     }
 
     @GET
-    @Path("/{id}")
-    public Response getById(@PathParam("id") int id) {
+    @Path("/{username}/{id}")
+    public Response getById(@PathParam("username") String username, @PathParam("id") int id) {
         try {
             Order order = orderBean.find(id);
 
             if(order != null) {
-
                 return Response.status(Response.Status.OK).entity(toDTO(order)).build();
             }
             return Response.status(Response.Status.NOT_FOUND).build();
