@@ -1,48 +1,39 @@
 package entities;
 
+import org.hibernate.validator.constraints.NotBlank;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Entity
-@Table(name="SPORTS")
+@Table(name="SPORTS", uniqueConstraints = @UniqueConstraint(columnNames = {"NAME"}))
 @NamedQueries({
         @NamedQuery(
                 name = "getAllSports",
                 query = "SELECT s FROM Sport s ORDER BY s.name"
+        ),
+        @NamedQuery(
+                name = "countSportByName",
+                query = "SELECT count(s) FROM Sport s WHERE s.name = :name"
         )
 })
 public class Sport implements Serializable {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int code;
+    @NotBlank(message = "name is mandatory")
+    @Column(nullable = false)
     private String name;
-    @ManyToMany
-    @JoinTable(name = "SPORTS_COACHES",
-            joinColumns = @JoinColumn(name = "SPORT_CODE", referencedColumnName = "CODE", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "COACH_USERNAME", referencedColumnName =
-                    "USERNAME", nullable = false))
-    private Set<Coach> coaches;
-    @ManyToMany
-    @JoinTable(name = "SPORTS_ATHLETES",
-            joinColumns = @JoinColumn(name = "SPORT_CODE", referencedColumnName = "CODE", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "ATHLETE_USERNAME", referencedColumnName =
-                    "USERNAME", nullable = false))
-    private Set<Athlete> athletes;
-    @OneToMany(mappedBy = "sport", cascade = CascadeType.REMOVE)
-    private Set<Rank> ranks;
+
     @Version
     private int version;
 
     public Sport() {
-        this.coaches = new LinkedHashSet<>();
-        this.athletes = new LinkedHashSet<>();
-        this.ranks = new LinkedHashSet<>();
     }
 
-    public Sport(int code, String name) {
+    public Sport(String name) {
         this();
-        this.code = code;
         this.name = name;
     }
 
@@ -60,53 +51,5 @@ public class Sport implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<Coach> getCoaches() {
-        return coaches;
-    }
-
-    public void setCoaches(Set<Coach> coaches) {
-        this.coaches = coaches;
-    }
-
-    public Set<Athlete> getAthletes() {
-        return athletes;
-    }
-
-    public void setAthletes(Set<Athlete> athletes) {
-        this.athletes = athletes;
-    }
-
-    public Set<Rank> getRanks() {
-        return ranks;
-    }
-
-    public void setRanks(Set<Rank> ranks) {
-        this.ranks = ranks;
-    }
-
-    public void addCoach(Coach coach) {
-        coaches.add(coach);
-    }
-
-    public void removeCoach(Coach coach){
-        coaches.remove(coach);
-    }
-
-    public void addAthlete(Athlete athlete) {
-        athletes.add(athlete);
-    }
-
-    public void removeAthlete(Athlete athlete){
-        athletes.remove(athlete);
-    }
-
-    public void addRank(Rank rank) {
-        ranks.add(rank);
-    }
-
-    public void removeRank(Rank rank){
-        ranks.remove(rank);
     }
 }

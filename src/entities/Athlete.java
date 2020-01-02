@@ -1,10 +1,8 @@
 package entities;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -16,30 +14,51 @@ import java.util.Set;
         )
 })
 public class Athlete extends Partner implements Serializable {
+    @OneToMany(mappedBy = "athlete", cascade = CascadeType.REMOVE)
+    private Set<SportSubscription> sportSubscriptions;
     @ManyToMany(mappedBy = "athletes")
-    private Set<Sport> sports;
+    private Set<Grade> grades;
+
     public Athlete() {
-        this.sports = new LinkedHashSet<>();
+        this.sportSubscriptions = new LinkedHashSet<>();
+        this.grades = new LinkedHashSet<>();
     }
 
-    public Athlete(String username, String password, String name, String email) {
-        super(username, password, name, email);
-        this.sports = new LinkedHashSet<>();
+    public Athlete(String username, String password, String name, String email, LocalDate birthDate) {
+        super(username, password, name, email, birthDate);
+        this.sportSubscriptions = new LinkedHashSet<>();
+        this.grades = new LinkedHashSet<>();
     }
 
-    public Set<Sport> getSports() {
-        return sports;
+    public Set<SportSubscription> getSportSubscriptions() {
+        return sportSubscriptions;
     }
 
-    public void setSports(Set<Sport> sports) {
-        this.sports = sports;
+    public void setSportSubscriptions(Set<SportSubscription> sportSubscriptions) {
+        this.sportSubscriptions = sportSubscriptions;
     }
 
-    public void addSport(Sport sport) {
-        sports.add(sport);
+    public Set<Grade> getGrades() {
+        return grades;
     }
 
-    public void removeSport(Sport sport){
-        sports.remove(sport);
+    public void setGrades(Set<Grade> grades) {
+        this.grades = grades;
+    }
+
+    public void addSportSubscription(SportSubscription sportSubscription) {
+        sportSubscriptions.add(sportSubscription);
+    }
+
+    public void removeSportSubscription(SportSubscription sportSubscription){
+        sportSubscriptions.remove(sportSubscription);
+    }
+
+    public void addGrade(Grade grade) {
+        grades.add(grade);
+    }
+
+    public void removeGrade(Grade grade){
+        grades.remove(grade);
     }
 }

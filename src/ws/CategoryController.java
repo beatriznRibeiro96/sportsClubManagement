@@ -34,13 +34,24 @@ public class CategoryController {
 
     @GET
     @Path("/")
+    public List<CategoryDTO> allValidCategories() {
+        try {
+            return toDTOs(categoryBean.getValidCategories());
+        } catch (Exception e) {
+            throw new EJBException("ERROR_GET_VALID_CATEGORIES", e);
+        }
+    }
+
+    @GET
+    @Path("/all")
     public List<CategoryDTO> all() {
         try {
             return toDTOs(categoryBean.all());
         } catch (Exception e) {
-            throw new EJBException("ERROR_GET_CATEGORIES", e);
+            throw new EJBException("ERROR_GET_ALL_CATEGORIES", e);
         }
     }
+
 
     @GET
     @Path("/{id}")
@@ -59,7 +70,7 @@ public class CategoryController {
 
     @POST
     @Path("/")
-    public Response createNewProduct(CategoryDTO categoryDTO) {
+    public Response createNewCategory(CategoryDTO categoryDTO) {
         try {
             Category newCategory = categoryBean.create(categoryDTO.getDescription());
 
@@ -75,7 +86,7 @@ public class CategoryController {
 
     @PUT
     @Path("/{id}")
-    public Response updateProduct(@PathParam("id") int idFromCategoryToUpdate, CategoryDTO categoryDTO) {
+    public Response updateCategory(@PathParam("id") int idFromCategoryToUpdate, CategoryDTO categoryDTO) {
         try {
             Category category = categoryBean.update(idFromCategoryToUpdate, categoryDTO.getDescription());
 
@@ -90,15 +101,11 @@ public class CategoryController {
 
     @DELETE
     @Path("/{id}")
-    public Response deleteProduct(@PathParam("id") int id) {
+    public Response deleteCategory(@PathParam("id") int id) {
         try {
             Category category = categoryBean.delete(id);
 
-            if(category != null) {
-                return Response.status(Response.Status.OK).entity(toDTO(category)).build();
-            }
-
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(Response.Status.OK).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }

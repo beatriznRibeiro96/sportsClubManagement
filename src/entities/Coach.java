@@ -2,6 +2,7 @@ package entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -14,30 +15,30 @@ import java.util.Set;
 })
 public class Coach extends User implements Serializable {
     @ManyToMany(mappedBy = "coaches")
-    private Set<Sport> sports;
+    private Set<Rank> ranks;
 
     public Coach() {
-        this.sports = new LinkedHashSet<>();
+        this.ranks = new LinkedHashSet<>();
     }
 
-    public Coach(String username, String password, String name, String email) {
-        super(username, password, name, email);
-        this.sports = new LinkedHashSet<>();
+    public Coach(String username, String password, String name, String email, LocalDate birthDate) {
+        super(username, password, name, email, birthDate);
+        this.ranks = new LinkedHashSet<>();
     }
 
-    public Set<Sport> getSports() {
-        return sports;
+    public Set<Rank> getRanks() {
+        return ranks;
     }
 
-    public void setSports(Set<Sport> sports) {
-        this.sports = sports;
+    public void setRanks(Set<Rank> ranks) {
+        this.ranks = ranks;
     }
 
-    public void addSport(Sport sport) {
-        sports.add(sport);
+    public void addRank(Rank rank) {
+        ranks.add(rank);
     }
 
-    public void removeSport(Sport sport){
-        sports.remove(sport);
+    public void removeRank(Rank rank){
+        ranks.remove(rank);
     }
 }

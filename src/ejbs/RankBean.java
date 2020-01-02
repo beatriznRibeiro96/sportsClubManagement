@@ -1,9 +1,13 @@
 package ejbs;
 
+import entities.ActiveSport;
+import entities.Coach;
 import entities.Rank;
-import entities.Sport;
+import entities.SportSubscription;
+import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
+import exceptions.Utils;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -11,7 +15,9 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
+import javax.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Set;
 
 @Stateless(name = "RankEJB")
 public class RankBean {
@@ -19,21 +25,29 @@ public class RankBean {
     private EntityManager em;
 
     @EJB
-    private SportBean sportBean;
+    private ActiveSportBean activeSportBean;
 
-    public Rank create (int code, String name, int sportCode) throws MyEntityExistsException, MyEntityNotFoundException {
-        if (find(code)!=null){
-            throw new MyEntityExistsException("Code '" + code + "' already exists");
-        }
-        Sport sport = sportBean.find(sportCode);
-        if(sport == null){
-            throw new MyEntityNotFoundException("Sport with code '" + sportCode + "' doesn't exist");
-        }
+    @EJB
+    private CoachBean coachBean;
+
+    public Rank create (String name, int idadeMin, int idadeMax, int activeSportCode) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException {
         try {
-            Rank rank = new Rank(code, name, sport);
+            ActiveSport activeSport = activeSportBean.find(activeSportCode);
+            if(activeSport == null){
+                throw new MyEntityNotFoundException("Active Sport not found.");
+            }
+            Long count = (Long) em.createNamedQuery("countRanksByNameAndActiveSport").setParameter("name", name).setParameter("activeSport", activeSport).getSingleResult();
+            if(count != 0){
+                throw new MyEntityExistsException("'" + name + "' already exists in '" + activeSport.getName() + "'");
+            }
+            Rank rank = new Rank(name, idadeMin, idadeMax, activeSport);
             em.persist(rank);
-            sport.addRank(rank);
+            activeSport.addRank(rank);
             return rank;
+        } catch (MyEntityExistsException | MyEntityNotFoundException e) {
+            throw e;
+        } catch(ConstraintViolationException e){
+            throw new MyConstraintViolationException(Utils.getConstraintViolationMessages(e));
         } catch(Exception e){
             throw new EJBException("ERROR_CREATING_RANK", e);
         }
@@ -55,36 +69,100 @@ public class RankBean {
         }
     }
 
-    public Rank update(int code, String name, int sportCode) throws MyEntityNotFoundException {
-        Rank rank = find(code);
-        Sport sport = sportBean.find(sportCode);
-        if(rank == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_RANK");
-        }
+    public Rank update(int code, String name, int idadeMin, int idadeMax, int activeSportCode) throws MyEntityNotFoundException, MyEntityExistsException {
         try{
+            Rank rank = find(code);
             em.lock(rank, LockModeType.OPTIMISTIC);
-            rank.setName(name);
-            rank.setSport(sport);
-            em.merge(rank);
-            if(!sport.getRanks().contains(rank)){
-                sport.addRank(rank);
+            if(rank == null){
+                throw new MyEntityNotFoundException("Rank with code '" + code + "' not found.");
             }
+            ActiveSport activeSport = activeSportBean.find(activeSportCode);
+            if(activeSport == null){
+                throw new MyEntityNotFoundException("Active Sport not found.");
+            }
+            Long count = (Long) em.createNamedQuery("countRanksByNameAndActiveSport").setParameter("name", name).setParameter("activeSport", activeSport).getSingleResult();
+            if(count != 0 && (!name.equals(rank.getName()) || activeSportCode != rank.getActiveSport().getCode())){
+                throw new MyEntityExistsException("'" + name + "' already exists in '" + activeSport.getName() + "'");
+            }
+            rank.setName(name);
+            rank.setIdadeMin(idadeMin);
+            rank.setIdadeMax(idadeMax);
+            if(!activeSport.getRanks().contains(rank)){
+                rank.getActiveSport().removeRank(rank);
+                activeSport.addRank(rank);
+                rank.setActiveSport(activeSport);
+            }
+            em.merge(rank);
             return rank;
-        }catch (Exception e){
+        } catch (MyEntityExistsException | MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
             throw new EJBException("ERROR_UPDATING_RANK", e);
         }
     }
 
     public void delete(int code) throws MyEntityNotFoundException {
-        Rank rank = find(code);
-        if(rank == null){
-            throw new MyEntityNotFoundException("ERROR_FINDING_RANK");
-        }
         try{
-            em.lock(rank, LockModeType.OPTIMISTIC);
+            Rank rank = find(code);
+            if(rank == null){
+                throw new MyEntityNotFoundException("Rank with code '" + code + "' not found.");
+            }
+            Set<Coach> coaches = rank.getCoaches();
+            if(coaches != null){
+                for (Coach coach:coaches) {
+                    coach.removeRank(rank);
+                }
+            }
+            Set<SportSubscription> sportSubscriptions = rank.getSportSubscriptions();
+            if(sportSubscriptions != null){
+                for (SportSubscription sportSubscription:sportSubscriptions) {
+                    sportSubscription.getAthlete().removeSportSubscription(sportSubscription);
+                }
+            }
+            rank.getActiveSport().removeRank(rank);
             em.remove(rank);
-        }catch (Exception e){
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
             throw new EJBException("ERROR_DELETING_RANK", e);
+        }
+    }
+
+    public void associateCoach(int rankCode, String coachUsername) throws MyEntityNotFoundException {
+        try{
+            Rank rank = find(rankCode);
+            if (rank == null) {
+                throw new MyEntityNotFoundException("Rank with code: " + rankCode + " not found.");
+            }
+            Coach coach = coachBean.find(coachUsername);
+            if (coach == null) {
+                throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
+            }
+            coach.addRank(rank);
+            rank.addCoach(coach);
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
+            throw new EJBException("ERROR_ASSOCIATE_COACH", e);
+        }
+    }
+
+    public void dissociateCoach(int rankCode, String coachUsername) throws MyEntityNotFoundException {
+        try{
+            Rank rank = find(rankCode);
+            if (rank == null) {
+                throw new MyEntityNotFoundException("Rank with code: " + rankCode + " not found.");
+            }
+            Coach coach = coachBean.find(coachUsername);
+            if (coach == null) {
+                throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
+            }
+            coach.removeRank(rank);
+            rank.removeCoach(coach);
+        } catch (MyEntityNotFoundException e) {
+            throw e;
+        } catch (Exception e){
+            throw new EJBException("ERROR_DISSOCIATE_COACH", e);
         }
     }
 }

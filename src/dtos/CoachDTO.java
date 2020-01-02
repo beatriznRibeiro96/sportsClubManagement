@@ -5,21 +5,21 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 
 public class CoachDTO extends UserDTO implements Serializable {
-    private Collection<SportDTO> sports;
+    private Collection<RankDTO> ranks;
     public CoachDTO() {
-        this.sports = new LinkedHashSet<>();
+        this.ranks = new LinkedHashSet<>();
     }
 
-    public CoachDTO(String username, String password, String name, String email) {
-        super(username, password, name, email);
-        this.sports = new LinkedHashSet<>();
+    public CoachDTO(String username, String password, String name, String email, String birthDate) {
+        super(username, password, name, email, birthDate);
+        this.ranks = new LinkedHashSet<>();
     }
 
-    public Collection<SportDTO> getSports() {
-        return sports;
+    public Collection<RankDTO> getRanks() {
+        return ranks;
     }
 
-    public void setSports(Collection<SportDTO> sports) {
-        this.sports = sports;
+    public void setRanks(Collection<RankDTO> ranks) {
+        this.ranks = ranks;
     }
 }
