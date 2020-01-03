@@ -54,24 +54,28 @@ public class AdministratorController {
     @GET
     @Path("{username}")
     public Response getAdministratorDetails(@PathParam("username") String username) {
-        String msg;
-        try {
-            Administrator administrator = administratorBean.find(username);
-            if (administrator != null) {
-                AdministratorDTO administratorDTO = toDTO(administrator);
-                return Response.status(Response.Status.OK)
-                        .entity(toDTO(administrator))
-                        .build();
+        Principal principal = securityContext.getUserPrincipal();
+        if(securityContext.isUserInRole("Administrator") || principal.getName().equals(username)) {
+            String msg;
+            try {
+                Administrator administrator = administratorBean.find(username);
+                if (administrator != null) {
+                    AdministratorDTO administratorDTO = toDTO(administrator);
+                    return Response.status(Response.Status.OK)
+                            .entity(toDTO(administrator))
+                            .build();
+                }
+                msg = "ERROR_FINDING_ADMINISTRATOR";
+                System.err.println(msg);
+            } catch (Exception e) {
+                msg = "ERROR_FETCHING_ADMINISTRATOR_DETAILS --->" + e.getMessage();
+                System.err.println(msg);
             }
-            msg = "ERROR_FINDING_ADMINISTRATOR";
-            System.err.println(msg);
-        } catch (Exception e) {
-            msg = "ERROR_FETCHING_ADMINISTRATOR_DETAILS --->" + e.getMessage();
-            System.err.println(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(msg)
+                    .build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(msg)
-                .build();
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @POST
@@ -84,12 +88,15 @@ public class AdministratorController {
     @PUT
     @Path("{username}")
     public Response updateAdministrator(@PathParam("username") String username, AdministratorDTO administratorDTO) throws MyEntityNotFoundException, MyParseDateException {
-        Administrator administrator = administratorBean.update(username,
-                administratorDTO.getPassword(),
-                administratorDTO.getName(),
-                administratorDTO.getEmail(),
-                administratorDTO.getBirthDate());
-        return Response.status(Response.Status.OK).entity(toDTO(administrator)).build();
+        if(securityContext.isUserInRole("Administrator")) {
+            Administrator administrator = administratorBean.update(username,
+                    administratorDTO.getPassword(),
+                    administratorDTO.getName(),
+                    administratorDTO.getEmail(),
+                    administratorDTO.getBirthDate());
+            return Response.status(Response.Status.OK).entity(toDTO(administrator)).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @DELETE

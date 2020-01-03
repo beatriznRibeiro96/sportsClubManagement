@@ -1,6 +1,8 @@
 package dtos;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 public class RankDTO implements Serializable {
     private int code;
@@ -9,8 +11,14 @@ public class RankDTO implements Serializable {
     private int idadeMax;
     private int activeSportCode;
     private String activeSportName;
+    private Collection<SportSubscriptionDTO> sportSubscriptions;
+    private Collection<CoachDTO> coaches;
+    private Collection<ScheduleDTO> schedules;
 
     public RankDTO() {
+        this.coaches = new LinkedHashSet<>();
+        this.sportSubscriptions = new LinkedHashSet<>();
+        this.schedules = new LinkedHashSet<>();
     }
 
     public RankDTO(int code, String name, int idadeMin, int idadeMax, int activeSportCode, String activeSportName) {
@@ -20,6 +28,9 @@ public class RankDTO implements Serializable {
         this.idadeMax = idadeMax;
         this.activeSportCode = activeSportCode;
         this.activeSportName = activeSportName;
+        this.coaches = new LinkedHashSet<>();
+        this.sportSubscriptions = new LinkedHashSet<>();
+        this.schedules = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -68,5 +79,29 @@ public class RankDTO implements Serializable {
 
     public void setActiveSportName(String activeSportName) {
         this.activeSportName = activeSportName;
+    }
+
+    public Collection<SportSubscriptionDTO> getSportSubscriptions() {
+        return sportSubscriptions;
+    }
+
+    public void setSportSubscriptions(Collection<SportSubscriptionDTO> sportSubscriptions) {
+        this.sportSubscriptions = sportSubscriptions;
+    }
+
+    public Collection<CoachDTO> getCoaches() {
+        return coaches;
+    }
+
+    public void setCoaches(Collection<CoachDTO> coaches) {
+        this.coaches = coaches;
+    }
+
+    public Collection<ScheduleDTO> getSchedules() {
+        return schedules;
+    }
+
+    public void setSchedules(Collection<ScheduleDTO> schedules) {
+        this.schedules = schedules;
     }
 }

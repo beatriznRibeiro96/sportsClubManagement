@@ -1,10 +1,8 @@
 package ws;
 
-import dtos.ActiveSportDTO;
-import dtos.CoachDTO;
-import dtos.SportDTO;
+import dtos.*;
 import ejbs.CoachBean;
-import entities.Coach;
+import entities.*;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
@@ -13,10 +11,10 @@ import exceptions.MyParseDateException;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
+import java.security.Principal;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,6 +25,9 @@ import java.util.stream.Collectors;
 public class CoachController {
     @EJB
     private CoachBean coachBean;
+
+    @Context
+    private SecurityContext securityContext;
 
     public static List<CoachDTO> toDTOs(Set<Coach> coaches) {
         return coaches.stream().map(CoachController::toDTO).collect(Collectors.toList());
@@ -42,7 +43,7 @@ public class CoachController {
                 coach.getBirthDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         );
 
-        coachDTO.setActiveSports(ActiveSportController.toDTOs(coach.getActiveSports()));
+        coachDTO.setRanks(RankController.toDTOs(coach.getRanks()));
         return coachDTO;
     }
 
@@ -71,23 +72,27 @@ public class CoachController {
     @GET
     @Path("{username}")
     public Response getCoachDetails(@PathParam("username") String username) {
-        String msg;
-        try {
-            Coach coach = coachBean.find(username);
-            if (coach != null) {
-                return Response.status(Response.Status.OK)
-                        .entity(toDTO(coach))
-                        .build();
+        Principal principal = securityContext.getUserPrincipal();
+        if(securityContext.isUserInRole("Administrator") || principal.getName().equals(username)) {
+            String msg;
+            try {
+                Coach coach = coachBean.find(username);
+                if (coach != null) {
+                    return Response.status(Response.Status.OK)
+                            .entity(toDTO(coach))
+                            .build();
+                }
+                msg = "ERROR_FINDING_COACH";
+                System.err.println(msg);
+            } catch (Exception e) {
+                msg = "ERROR_FETCHING_COACH_DETAILS --->" + e.getMessage();
+                System.err.println(msg);
             }
-            msg = "ERROR_FINDING_COACH";
-            System.err.println(msg);
-        } catch (Exception e) {
-            msg = "ERROR_FETCHING_COACH_DETAILS --->" + e.getMessage();
-            System.err.println(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(msg)
+                    .build();
         }
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(msg)
-                .build();
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @POST
@@ -104,12 +109,15 @@ public class CoachController {
     @PUT
     @Path("{username}")
     public Response updateCoach(@PathParam("username") String username, CoachDTO coachDTO) throws MyEntityNotFoundException, MyParseDateException {
-        Coach coach = coachBean.update(username,
-                coachDTO.getPassword(),
-                coachDTO.getName(),
-                coachDTO.getEmail(),
-                coachDTO.getBirthDate());
-        return Response.status(Response.Status.OK).entity(toDTO(coach)).build();
+        if(securityContext.isUserInRole("Administrator")) {
+            Coach coach = coachBean.update(username,
+                    coachDTO.getPassword(),
+                    coachDTO.getName(),
+                    coachDTO.getEmail(),
+                    coachDTO.getBirthDate());
+            return Response.status(Response.Status.OK).entity(toDTO(coach)).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity("Cannot access this information").build();
     }
 
     @DELETE
@@ -120,14 +128,43 @@ public class CoachController {
     }
 
     @GET
-    @Path("{username}/sports")
-    public Response getCoachActiveSports(@PathParam("username") String username) {
+    @Path("{username}/ranks")
+    public Response getCoachRanks(@PathParam("username") String username) {
         String msg;
         try {
             Coach coach = coachBean.find(username);
             if (coach != null) {
+                GenericEntity<List<RankDTO>> entity
+                        = new GenericEntity<List<RankDTO>>(RankController.toDTOs(coach.getRanks())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_COACH";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_COACH_RANKS --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
+
+    @GET
+    @Path("{username}/activeSports")
+    public Response getCoachActiveSports(@PathParam("username") String username) {
+        String msg;
+        try {
+            Coach coach = coachBean.find(username);
+            Set<ActiveSport> activeSports = new LinkedHashSet<>();
+            if (coach != null) {
+                for (Rank rank:coach.getRanks()) {
+                    activeSports.add(rank.getActiveSport());
+                }
                 GenericEntity<List<ActiveSportDTO>> entity
-                        = new GenericEntity<List<ActiveSportDTO>>(ActiveSportController.toDTOs(coach.getActiveSports())) {
+                        = new GenericEntity<List<ActiveSportDTO>>(ActiveSportController.toDTOs(activeSports)) {
                 };
                 return Response.status(Response.Status.OK)
                         .entity(entity)
@@ -137,6 +174,68 @@ public class CoachController {
             System.err.println(msg);
         } catch (Exception e) {
             msg = "ERROR_FETCHING_COACH_ACTIVE_SPORTS --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
+
+    @GET
+    @Path("{username}/schedules")
+    public Response getCoachSchedules(@PathParam("username") String username) {
+        String msg;
+        try {
+            Coach coach = coachBean.find(username);
+            Set<Schedule> schedules = new LinkedHashSet<>();
+            if (coach != null) {
+                for (Rank rank:coach.getRanks()) {
+                    schedules.addAll(rank.getSchedules());
+                }
+                GenericEntity<List<ScheduleDTO>> entity
+                        = new GenericEntity<List<ScheduleDTO>>(ScheduleController.toDTOs(schedules)) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_COACH";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_COACH_SCHEDULES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
+
+    @GET
+    @Path("{username}/athletes")
+    public Response getCoachAthletes(@PathParam("username") String username) {
+        String msg;
+        try {
+            Coach coach = coachBean.find(username);
+            Set<Athlete> athletes = new LinkedHashSet<>();
+            Set<SportSubscription> sportSubscriptions = new LinkedHashSet<>();
+            if (coach != null) {
+                for (Rank rank:coach.getRanks()) {
+                    sportSubscriptions.addAll(rank.getSportSubscriptions());
+                }
+                for (SportSubscription sportSubscription:sportSubscriptions) {
+                    athletes.add(sportSubscription.getAthlete());
+                }
+                GenericEntity<List<AthleteDTO>> entity
+                        = new GenericEntity<List<AthleteDTO>>(AthleteController.toDTOs(athletes)) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_COACH";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_COACH_ATHLETES --->" + e.getMessage();
             System.err.println(msg);
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

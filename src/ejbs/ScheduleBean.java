@@ -1,6 +1,7 @@
 package ejbs;
 
 import entities.ActiveSport;
+import entities.Rank;
 import entities.Schedule;
 import exceptions.*;
 
@@ -24,17 +25,17 @@ public class ScheduleBean {
     private EntityManager em;
 
     @EJB
-    private ActiveSportBean activeSportBean;
+    private RankBean rankBean;
 
-    public Schedule create (String name, int dayOfWeek, String startTime, String endTime, int activeSportCode) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException, MyParseDateException, MyIllegalArgumentException {
+    public Schedule create (String name, int dayOfWeek, String startTime, String endTime, int rankCode) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException, MyParseDateException, MyIllegalArgumentException {
         try {
-            ActiveSport activeSport = activeSportBean.find(activeSportCode);
-            if(activeSport == null){
-                throw new MyEntityNotFoundException("Active Sport not found.");
+            Rank rank = rankBean.find(rankCode);
+            if(rank == null){
+                throw new MyEntityNotFoundException("Rank not found.");
             }
-            Long count = (Long) em.createNamedQuery("countSchedulesByNameAndActiveSport").setParameter("name", name).setParameter("activeSport", activeSport).getSingleResult();
+            Long count = (Long) em.createNamedQuery("countSchedulesByNameAndRank").setParameter("name", name).setParameter("rank", rank).getSingleResult();
             if(count != 0){
-                throw new MyEntityExistsException("'" + name + "' already exists in '" + activeSport.getName() + "'");
+                throw new MyEntityExistsException("'" + name + "' already exists in '" + rank.getName() + "'");
             }
             Set<Integer> daysValues = new LinkedHashSet<>(7);
             for (int i = 0; i <= 7; i++) {
@@ -47,14 +48,14 @@ public class ScheduleBean {
                 throw new MyParseDateException("Start time and end time cannot be empty");
             }
             DayOfWeek diaSemana = DayOfWeek.values()[dayOfWeek];
-            LocalTime horaInicio = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("H:mm"));
-            LocalTime horaFim = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime horaInicio = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime horaFim = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("HH:mm"));
             if(!horaInicio.isBefore(horaFim)){
                 throw new MyIllegalArgumentException("Start time needs to be lower than end time");
             }
-            Schedule schedule = new Schedule(name, diaSemana, horaInicio, horaFim, activeSport);
+            Schedule schedule = new Schedule(name, diaSemana, horaInicio, horaFim, rank);
             em.persist(schedule);
-            activeSport.addSchedule(schedule);
+            rank.addSchedule(schedule);
             return schedule;
         } catch (MyEntityExistsException | MyEntityNotFoundException | MyParseDateException | MyIllegalArgumentException e) {
             throw e;
@@ -81,20 +82,20 @@ public class ScheduleBean {
         }
     }
 
-    public Schedule update(int code, String name, int dayOfWeek, String startTime, String endTime, int activeSportCode) throws MyEntityNotFoundException, MyEntityExistsException, MyParseDateException, MyIllegalArgumentException {
+    public Schedule update(int code, String name, int dayOfWeek, String startTime, String endTime, int rankCode) throws MyEntityNotFoundException, MyEntityExistsException, MyParseDateException, MyIllegalArgumentException {
         try{
             Schedule schedule = find(code);
             em.lock(schedule, LockModeType.OPTIMISTIC);
             if(schedule == null){
                 throw new MyEntityNotFoundException("Schedule with code '" + code + "' not found.");
             }
-            ActiveSport activeSport = activeSportBean.find(activeSportCode);
-            if(activeSport == null){
+            Rank rank = rankBean.find(rankCode);
+            if(rank == null){
                 throw new MyEntityNotFoundException("Active Sport not found.");
             }
-            Long count = (Long) em.createNamedQuery("countSchedulesByNameAndActiveSport").setParameter("name", name).setParameter("activeSport", activeSport).getSingleResult();
-            if(count != 0 && (!name.equals(schedule.getName()) || activeSportCode != schedule.getActiveSport().getCode())){
-                throw new MyEntityExistsException("'" + name + "' already exists in '" + activeSport.getName() + "'");
+            Long count = (Long) em.createNamedQuery("countSchedulesByNameAndRank").setParameter("name", name).setParameter("rank", rank).getSingleResult();
+            if(count != 0 && (!name.equals(schedule.getName()) || rankCode != schedule.getRank().getCode())){
+                throw new MyEntityExistsException("'" + name + "' already exists in '" + rank.getName() + "'");
             }
             Set<Integer> daysValues = new LinkedHashSet<>(7);
             for (int i = 0; i <= 7; i++) {
@@ -107,8 +108,8 @@ public class ScheduleBean {
                 throw new MyParseDateException("Start time and end time cannot be empty");
             }
             DayOfWeek diaSemana = DayOfWeek.values()[dayOfWeek];
-            LocalTime horaInicio = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("H:mm"));
-            LocalTime horaFim = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime horaInicio = LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime horaFim = LocalTime.parse(endTime, DateTimeFormatter.ofPattern("HH:mm"));
             if(!horaInicio.isBefore(horaFim)){
                 throw new MyIllegalArgumentException("Start time needs to be lower than end time");
             }
@@ -116,10 +117,10 @@ public class ScheduleBean {
             schedule.setDayOfWeek(diaSemana);
             schedule.setStartTime(horaInicio);
             schedule.setEndTime(horaFim);
-            if(!activeSport.getSchedules().contains(schedule)){
-                schedule.getActiveSport().removeSchedule(schedule);
-                activeSport.addSchedule(schedule);
-                schedule.setActiveSport(activeSport);
+            if(!rank.getSchedules().contains(schedule)){
+                schedule.getRank().removeSchedule(schedule);
+                rank.addSchedule(schedule);
+                schedule.setRank(rank);
             }
             em.merge(schedule);
             return schedule;
@@ -136,7 +137,7 @@ public class ScheduleBean {
             if(schedule == null){
                 throw new MyEntityNotFoundException("Schedule with code '" + code + "' not found.");
             }
-            schedule.getActiveSport().removeSchedule(schedule);
+            schedule.getRank().removeSchedule(schedule);
             em.remove(schedule);
         } catch (MyEntityNotFoundException e) {
             throw e;
