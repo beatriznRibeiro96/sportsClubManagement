@@ -308,8 +308,6 @@ public class AthleteController {
         String msg;
         try {
             Athlete athlete = athleteBean.find(username);
-            Set<Coach> coaches = new LinkedHashSet<>();
-            Set<Rank> ranks = new LinkedHashSet<>();
             if (athlete != null) {
                 GenericEntity<List<MessageDTO>> entity
                         = new GenericEntity<List<MessageDTO>>(MessageController.toDTOs(athlete.getMessages())) {
