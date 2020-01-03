@@ -1,5 +1,6 @@
 package ws;
 
+import dtos.MessageDTO;
 import dtos.PartnerDTO;
 import ejbs.PartnerBean;
 import entities.Partner;
@@ -11,10 +12,7 @@ import exceptions.MyParseDateException;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -108,5 +106,30 @@ public class PartnerController {
     public Response deletePartner (@PathParam("username") String username) throws MyEntityNotFoundException{
         partnerBean.delete(username);
         return Response.status(Response.Status.OK).build();
+    }
+
+    @GET
+    @Path("{username}/messages")
+    public Response getPartnerMessages(@PathParam("username") String username) {
+        String msg;
+        try {
+            Partner partner = partnerBean.find(username);
+            if (partner != null) {
+                GenericEntity<List<MessageDTO>> entity
+                        = new GenericEntity<List<MessageDTO>>(MessageController.toDTOs(partner.getMessages())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_PARTNER";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_PARTNER_MESSAGES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
     }
 }

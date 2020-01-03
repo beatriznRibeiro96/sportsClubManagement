@@ -242,4 +242,29 @@ public class CoachController {
                 .entity(msg)
                 .build();
     }
+
+    @GET
+    @Path("{username}/messages")
+    public Response getCoachMessages(@PathParam("username") String username) {
+        String msg;
+        try {
+            Coach coach = coachBean.find(username);
+            if (coach != null) {
+                GenericEntity<List<MessageDTO>> entity
+                        = new GenericEntity<List<MessageDTO>>(MessageController.toDTOs(coach.getMessages())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_COACH";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_COACH_MESSAGES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
 }

@@ -1,6 +1,7 @@
 package ws;
 
 import dtos.AdministratorDTO;
+import dtos.MessageDTO;
 import ejbs.AdministratorBean;
 import entities.Administrator;
 import exceptions.MyConstraintViolationException;
@@ -11,10 +12,7 @@ import exceptions.MyParseDateException;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -108,5 +106,30 @@ public class AdministratorController {
             return Response.status(Response.Status.OK).build();
         }
         return Response.status(Response.Status.FORBIDDEN).entity("Cannot delete yourself").build();
+    }
+
+    @GET
+    @Path("{username}/messages")
+    public Response getAdministratorMessages(@PathParam("username") String username) {
+        String msg;
+        try {
+            Administrator administrator = administratorBean.find(username);
+            if (administrator != null) {
+                GenericEntity<List<MessageDTO>> entity
+                        = new GenericEntity<List<MessageDTO>>(MessageController.toDTOs(administrator.getMessages())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_ADMINISTRATOR";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_ADMINISTRATOR_MESSAGES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
     }
 }
