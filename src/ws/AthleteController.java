@@ -301,4 +301,31 @@ public class AthleteController {
                 .entity(msg)
                 .build();
     }
+
+    @GET
+    @Path("{username}/messages")
+    public Response getAthleteMessages(@PathParam("username") String username) {
+        String msg;
+        try {
+            Athlete athlete = athleteBean.find(username);
+            Set<Coach> coaches = new LinkedHashSet<>();
+            Set<Rank> ranks = new LinkedHashSet<>();
+            if (athlete != null) {
+                GenericEntity<List<MessageDTO>> entity
+                        = new GenericEntity<List<MessageDTO>>(MessageController.toDTOs(athlete.getMessages())) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_ATHLETE";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_ATHLETE_MESSAGES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
 }

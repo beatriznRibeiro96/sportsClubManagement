@@ -3,6 +3,11 @@ package ws;
 import dtos.EmailDTO;
 import dtos.UserDTO;
 import ejbs.EmailBean;
+import ejbs.MessageBean;
+import entities.Message;
+import exceptions.MyConstraintViolationException;
+import exceptions.MyEntityExistsException;
+import exceptions.MyEntityNotFoundException;
 import exceptions.MyNoRecipientException;
 
 import javax.ejb.EJB;
@@ -20,12 +25,17 @@ public class UserController {
     @EJB
     private EmailBean emailBean;
 
+    @EJB
+    private MessageBean messageBean;
+
     @POST
     @Path("email/send")
-    public Response sendEmailToUser(EmailDTO email) throws MyNoRecipientException {
+    public Response sendEmailToUser(EmailDTO email) throws MyNoRecipientException, MyConstraintViolationException, MyEntityNotFoundException {
         String recepientes = "";
         int counter = 0;
+        Message message = messageBean.create(email.getSubject(), email.getMessage());
         for (UserDTO userDTO:email.getRecepientes()) {
+            messageBean.addMessageToUser(message.getCode(), userDTO.getUsername());
             if(counter == 0){
                 recepientes = recepientes + userDTO.getEmail();
             }

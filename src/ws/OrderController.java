@@ -85,13 +85,22 @@ public class OrderController {
     }
 
     @GET
-    @Path("/{id}")
-    public Response getById(@PathParam("id") int id) {
+    @Path("/{username}")
+    public List<OrderDTO> all(@PathParam("username") String username) {
+        try {
+            return orderBean.ordersFromUser(username);
+        } catch (Exception e) {
+            throw new EJBException("ERROR_GET_ORDERS", e);
+        }
+    }
+
+    @GET
+    @Path("/{username}/{id}")
+    public Response getById(@PathParam("username") String username, @PathParam("id") int id) {
         try {
             Order order = orderBean.find(id);
 
             if(order != null) {
-
                 return Response.status(Response.Status.OK).entity(toDTO(order)).build();
             }
             return Response.status(Response.Status.NOT_FOUND).build();

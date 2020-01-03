@@ -49,13 +49,16 @@ public class User implements Serializable {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Set<Order> orders;
+    @ManyToMany(mappedBy = "users")
+    private Set<Message> messages;
 
     @Version
     private int version;
 
 
     public User() {
-        orders = new LinkedHashSet<>();
+        this.orders = new LinkedHashSet<>();
+        this.messages = new LinkedHashSet<>();
     }
 
     public User(String username, String password, String name, String email, LocalDate birthDate) {
@@ -115,6 +118,14 @@ public class User implements Serializable {
         this.birthDate = birthDate;
     }
 
+    public Set<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(Set<Message> messages) {
+        this.messages = messages;
+    }
+
     public int age(){
         return Period.between(this.birthDate, LocalDate.now()).getYears();
     }
@@ -144,4 +155,11 @@ public class User implements Serializable {
         this.orders.remove(order);
     }
 
+    public void addMessage(Message message) {
+        this.messages.add(message);
+    }
+
+    public void removeMessage(Message message) {
+        this.messages.remove(message);
+    }
 }

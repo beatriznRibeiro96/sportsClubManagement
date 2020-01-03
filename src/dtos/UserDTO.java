@@ -1,6 +1,8 @@
 package dtos;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 public class UserDTO implements Serializable {
 
@@ -9,8 +11,10 @@ public class UserDTO implements Serializable {
     private String name;
     private String email;
     private String birthDate;
+    private Collection<MessageDTO> messages;
 
     public UserDTO() {
+        this.messages = new LinkedHashSet<>();
     }
 
     public UserDTO(String username, String password, String name, String email, String birthDate) {
@@ -19,6 +23,7 @@ public class UserDTO implements Serializable {
         this.name = name;
         this.email = email;
         this.birthDate = birthDate;
+        this.messages = new LinkedHashSet<>();
     }
     public void reset() {
         setUsername(null);
@@ -26,6 +31,7 @@ public class UserDTO implements Serializable {
         setName(null);
         setEmail(null);
         setBirthDate(null);
+        setMessages(new LinkedHashSet<>());
     }
 
     public String getUsername() {
@@ -68,4 +74,11 @@ public class UserDTO implements Serializable {
         this.birthDate = birthDate;
     }
 
+    public Collection<MessageDTO> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(Collection<MessageDTO> messages) {
+        this.messages = messages;
+    }
 }
