@@ -249,8 +249,6 @@ public class CoachController {
         String msg;
         try {
             Coach coach = coachBean.find(username);
-            Set<Athlete> athletes = new LinkedHashSet<>();
-            Set<SportSubscription> sportSubscriptions = new LinkedHashSet<>();
             if (coach != null) {
                 GenericEntity<List<MessageDTO>> entity
                         = new GenericEntity<List<MessageDTO>>(MessageController.toDTOs(coach.getMessages())) {
