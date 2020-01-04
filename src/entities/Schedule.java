@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
 @Entity
-@Table(name="SCHEDULES", uniqueConstraints = @UniqueConstraint(columnNames = {"NAME"}))
+@Table(name="SCHEDULES", uniqueConstraints = @UniqueConstraint(columnNames = {"NAME", "RANK_CODE"}))
 @NamedQueries({
         @NamedQuery(
                 name = "getAllSchedules",
