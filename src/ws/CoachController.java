@@ -267,4 +267,33 @@ public class CoachController {
                 .entity(msg)
                 .build();
     }
+
+    @GET
+    @Path("{username}/trainings")
+    public Response getCoachTrainings(@PathParam("username") String username) {
+        String msg;
+        try {
+            Coach coach = coachBean.find(username);
+            if (coach != null) {
+                Set<Training> trainings = new LinkedHashSet<>();
+                for (Rank rank:coach.getRanks()) {
+                    trainings.addAll(rank.getTrainings());
+                }
+                GenericEntity<List<TrainingDTO>> entity
+                        = new GenericEntity<List<TrainingDTO>>(TrainingController.toDTOs(trainings)) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_COACH";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_COACH_TRAININGS --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
 }

@@ -3,6 +3,7 @@ package ejbs;
 import entities.ActiveSport;
 import entities.Rank;
 import entities.Schedule;
+import entities.Training;
 import exceptions.*;
 
 import javax.ejb.EJB;
@@ -26,6 +27,9 @@ public class ScheduleBean {
 
     @EJB
     private RankBean rankBean;
+
+    @EJB
+    private TrainingBean trainingBean;
 
     public Schedule create (String name, int dayOfWeek, String startTime, String endTime, int rankCode) throws MyEntityExistsException, MyEntityNotFoundException, MyConstraintViolationException, MyParseDateException, MyIllegalArgumentException {
         try {
@@ -55,6 +59,7 @@ public class ScheduleBean {
             }
             Schedule schedule = new Schedule(name, diaSemana, horaInicio, horaFim, rank);
             em.persist(schedule);
+            Training training = trainingBean.create("Treino " + name, rankCode, schedule.getCode());
             rank.addSchedule(schedule);
             return schedule;
         } catch (MyEntityExistsException | MyEntityNotFoundException | MyParseDateException | MyIllegalArgumentException e) {

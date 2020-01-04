@@ -3,13 +3,14 @@ package ws;
 import dtos.AthleteDTO;
 import dtos.CoachDTO;
 import dtos.RankDTO;
+import dtos.TrainingDTO;
+import ejbs.CoachBean;
 import ejbs.RankBean;
-import entities.Athlete;
-import entities.Rank;
-import entities.SportSubscription;
+import entities.*;
 import exceptions.MyConstraintViolationException;
 import exceptions.MyEntityExistsException;
 import exceptions.MyEntityNotFoundException;
+import exceptions.MyIllegalArgumentException;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -105,6 +106,20 @@ public class RankController {
         return Response.status(Response.Status.OK).build();
     }
 
+    @PUT
+    @Path("{code}/associate/{username}")
+    public Response associateCoach(@PathParam("username") String username, @PathParam("code") int code) throws MyEntityNotFoundException, MyIllegalArgumentException {
+        rankBean.associateCoach(code, username);
+        return Response.status(Response.Status.OK).build();
+    }
+
+    @PUT
+    @Path("{code}/dissociate/{username}")
+    public Response dissociateCoach(@PathParam("username") String username, @PathParam("code") int code) throws MyEntityNotFoundException {
+        rankBean.dissociateCoach(code, username);
+        return Response.status(Response.Status.OK).build();
+    }
+
     @GET
     @Path("{code}/coaches")
     public Response getRankCoaches(@PathParam("code") int code) {
@@ -152,6 +167,32 @@ public class RankController {
             System.err.println(msg);
         } catch (Exception e) {
             msg = "ERROR_FETCHING_RANK_ATHLETES --->" + e.getMessage();
+            System.err.println(msg);
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(msg)
+                .build();
+    }
+
+    @GET
+    @Path("{code}/trainings")
+    public Response getRankTrainings(@PathParam("code") int code) {
+        String msg;
+        try {
+            Rank rank = rankBean.find(code);
+            if (rank != null) {
+                Set<Training> trainings = new LinkedHashSet<>(rank.getTrainings());
+                GenericEntity<List<TrainingDTO>> entity
+                        = new GenericEntity<List<TrainingDTO>>(TrainingController.toDTOs(trainings)) {
+                };
+                return Response.status(Response.Status.OK)
+                        .entity(entity)
+                        .build();
+            }
+            msg = "ERROR_FINDING_RANK";
+            System.err.println(msg);
+        } catch (Exception e) {
+            msg = "ERROR_FETCHING_RANK_TRAININGS --->" + e.getMessage();
             System.err.println(msg);
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

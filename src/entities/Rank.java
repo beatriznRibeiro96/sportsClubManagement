@@ -49,6 +49,9 @@ public class Rank implements Serializable {
     @OneToMany(mappedBy = "rank", cascade = CascadeType.REMOVE)
     private Set<Schedule> schedules;
 
+    @OneToMany(mappedBy = "rank", cascade = CascadeType.REMOVE)
+    private Set<Training> trainings;
+
     @Version
     private int version;
 
@@ -56,6 +59,7 @@ public class Rank implements Serializable {
         this.coaches = new LinkedHashSet<>();
         this.sportSubscriptions = new LinkedHashSet<>();
         this.schedules = new LinkedHashSet<>();
+        this.trainings = new LinkedHashSet<>();
     }
 
     public Rank(String name, int idadeMin, int idadeMax, ActiveSport activeSport) {
@@ -66,6 +70,7 @@ public class Rank implements Serializable {
         this.idadeMax = idadeMax;
         this.activeSport = activeSport;
         this.schedules = new LinkedHashSet<>();
+        this.trainings = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -132,6 +137,14 @@ public class Rank implements Serializable {
         this.schedules = schedules;
     }
 
+    public Set<Training> getTrainings() {
+        return trainings;
+    }
+
+    public void setTrainings(Set<Training> trainings) {
+        this.trainings = trainings;
+    }
+
     public void addSportSubscription(SportSubscription sportSubscription) {
         sportSubscriptions.add(sportSubscription);
     }
@@ -151,4 +164,8 @@ public class Rank implements Serializable {
     public void addSchedule(Schedule schedule) { schedules.add(schedule); }
 
     public void removeSchedule(Schedule schedule) { schedules.remove(schedule); }
+
+    public void addTraining(Training training) { trainings.add(training); }
+
+    public void removeTraining(Training training) { trainings.remove(training); }
 }

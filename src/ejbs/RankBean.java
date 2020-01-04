@@ -4,10 +4,7 @@ import entities.ActiveSport;
 import entities.Coach;
 import entities.Rank;
 import entities.SportSubscription;
-import exceptions.MyConstraintViolationException;
-import exceptions.MyEntityExistsException;
-import exceptions.MyEntityNotFoundException;
-import exceptions.Utils;
+import exceptions.*;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -128,7 +125,7 @@ public class RankBean {
         }
     }
 
-    public void associateCoach(int rankCode, String coachUsername) throws MyEntityNotFoundException {
+    public void associateCoach(int rankCode, String coachUsername) throws MyEntityNotFoundException, MyIllegalArgumentException {
         try{
             Rank rank = find(rankCode);
             if (rank == null) {
@@ -138,9 +135,12 @@ public class RankBean {
             if (coach == null) {
                 throw new MyEntityNotFoundException("Username '" + coachUsername + "' not found.");
             }
+            if(rank.getCoaches().contains(coach)){
+                throw new MyIllegalArgumentException("Coach is already teaching in rank with code '" + rankCode + "'");
+            }
             coach.addRank(rank);
             rank.addCoach(coach);
-        } catch (MyEntityNotFoundException e) {
+        } catch (MyEntityNotFoundException | MyIllegalArgumentException e) {
             throw e;
         } catch (Exception e){
             throw new EJBException("ERROR_ASSOCIATE_COACH", e);
