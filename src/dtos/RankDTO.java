@@ -14,11 +14,13 @@ public class RankDTO implements Serializable {
     private Collection<SportSubscriptionDTO> sportSubscriptions;
     private Collection<CoachDTO> coaches;
     private Collection<ScheduleDTO> schedules;
+    private Collection<TrainingDTO> trainings;
 
     public RankDTO() {
         this.coaches = new LinkedHashSet<>();
         this.sportSubscriptions = new LinkedHashSet<>();
         this.schedules = new LinkedHashSet<>();
+        this.trainings = new LinkedHashSet<>();
     }
 
     public RankDTO(int code, String name, int idadeMin, int idadeMax, int activeSportCode, String activeSportName) {
@@ -31,6 +33,7 @@ public class RankDTO implements Serializable {
         this.coaches = new LinkedHashSet<>();
         this.sportSubscriptions = new LinkedHashSet<>();
         this.schedules = new LinkedHashSet<>();
+        this.trainings = new LinkedHashSet<>();
     }
 
     public int getCode() {
@@ -103,5 +106,13 @@ public class RankDTO implements Serializable {
 
     public void setSchedules(Collection<ScheduleDTO> schedules) {
         this.schedules = schedules;
+    }
+
+    public Collection<TrainingDTO> getTrainings() {
+        return trainings;
+    }
+
+    public void setTrainings(Collection<TrainingDTO> trainings) {
+        this.trainings = trainings;
     }
 }

@@ -68,6 +68,9 @@ public class ConfigBean {
     @EJB
     private ScheduleBean scheduleBean;
 
+    @EJB
+    private TrainingBean trainingBean;
+
     @PostConstruct
     public void PopulateDB(){
         try {
@@ -123,9 +126,9 @@ public class ConfigBean {
             Grade grade = gradeBean.create("Formação Completa", activeSport.getCode());
             Grade grade2 = gradeBean.create("Atleta com distinção", activeSport.getCode());
             Grade grade3 = gradeBean.create("Goleador 18/19", activeSport2.getCode());
-            Schedule schedule = scheduleBean.create("Treino Futebol Seniores Manhã Segunda", 1, "09:30", "12:30", rank2.getCode());
-            Schedule schedule2 = scheduleBean.create("Treino Futebol Juniores Tarde Segunda", 1, "14:30", "17:30", rank1.getCode());
-            Schedule schedule3 = scheduleBean.create("Treino Futebol Juniores Manhã Quarta", 3, "09:30", "12:00", rank1.getCode());
+            Schedule schedule = scheduleBean.create("Futebol Seniores Manhã Segunda", 1, "09:30", "12:30", rank2.getCode());
+            Schedule schedule2 = scheduleBean.create("Futebol Juniores Tarde Segunda", 1, "14:30", "17:30", rank1.getCode());
+            Schedule schedule3 = scheduleBean.create("Futebol Juniores Manhã Quarta", 3, "09:30", "12:00", rank1.getCode());
             rankBean.associateCoach(rank1.getCode(), coach.getUsername());
             rankBean.associateCoach(rank2.getCode(), coach.getUsername());
             rankBean.associateCoach(rank3.getCode(), coach2.getUsername());
